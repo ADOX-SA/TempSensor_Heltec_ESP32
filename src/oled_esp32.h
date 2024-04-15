@@ -25,7 +25,7 @@ void oled_esp32_begin(){
     for (;;)
       ; // Don't proceed, loop forever
   }
-
+/*
   display.clearDisplay();
   display.display();
 
@@ -48,6 +48,7 @@ void oled_esp32_begin(){
   display.println(oled_modo);
 
   display.display();
+  */
 }
 
 void oled_receptor(String data_received){
@@ -97,3 +98,73 @@ void oled_transmisor(String data_sent){
 
   display.display();
 }
+
+
+void oled_init()
+{
+
+  display.clearDisplay();
+  display.display();
+  display.setTextColor(SSD1306_WHITE);
+
+  int time1 = 200;
+
+  String aux = "ADOX";
+  int tam = aux.length();
+  display.setCursor(25, 0); // Start at top-left corner
+  display.setTextSize(3);   // Draw 2X-scale text
+  for (int i = 0; i < tam; i++)
+  {
+    display.print(aux[i]);
+    display.display();
+    delay(time1);
+  }
+
+  delay(400);
+  time1 = 75;
+  aux = "Termometro";
+  tam = aux.length();
+  display.setCursor(0, 26); // Start at top-left corner
+  display.setTextSize(2);
+  for (int i = 0; i < tam; i++)
+  {
+    if (i == 4)
+    {
+      display.cp437(true);
+      display.write(162);
+    }
+    else
+    {
+      display.print(aux[i]);
+    }
+    display.display();
+    delay(time1);
+  }
+
+  aux = "Infrarrojo";
+  tam = aux.length();
+  display.setCursor(0, 44); // Start at top-left corner
+  display.setTextSize(2);
+
+  for (int i = 0; i < tam; i++)
+  {
+
+    display.print(aux[i]);
+
+    display.display();
+    delay(time1);
+  }
+
+  aux = firmVer;
+  tam = aux.length();
+  display.setCursor(105, 13); // Start at top-left corner
+  display.setTextSize(1);
+  for (int i = 0; i < tam; i++)
+  {
+    display.print(aux[i]);
+    display.display();
+    delay(time1);
+  }
+}
+
+

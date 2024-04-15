@@ -5,6 +5,8 @@ String oled_modo = "Receptor";
 #include "EEPROM.h"
 #include <WiFi.h>
 
+int pin_led = 35;
+
 // --- Redondear una float o una double
 float redondear(float valor, int decimales)
 {
@@ -20,7 +22,7 @@ void setup()
 {
   Serial.begin(115200);
   oled_esp32_begin();
-
+  oled_init();
   // initialize SX1262 with default settings
   Serial.print("Inicianco... ");
 
@@ -34,17 +36,77 @@ void setup()
     delay(100);
     Serial.print('.');
   }
+  MLX90614_object_temp = 21.1;
+
+  pinMode(pin_led, OUTPUT);
 }
 
 void loop()
 {
 
+  static int x = 1;
+  if (x)
+  {
+
+    x = 0;
+    Serial.print("\nLoop!");
+  }
+
   //////////////////////////////////////////////
   static int time1 = millis();
   int time2 = millis();
-  if ((time2 - time1) > 2000)
+  if ((time2 - time1) > 5000)
   {
+    /*
+        for (int i = 0; i < 7; i++)
+        {
+          digitalWrite(pin_led, 1);
+          delay(25);
+
+          digitalWrite(pin_led, 0);
+          delay(25);
+        }
+        */
+    //---
+    display.clearDisplay();
+    display.display();
+    //-
+    display.drawRect(0, 0, 128, 64, SSD1306_WHITE);
+    //-
+    String aux = "Measuring";
+    int tam = aux.length();
+    display.setCursor(10, 5); // Start at top-left corner
+    display.setTextSize(2);
+    for (int i = 0; i < tam; i++)
+    {
+      display.print(aux[i]);
+      display.display();
+      delay(35);
+    }
+    //-
+    aux = String(MLX90614_object_temp, 1) + " ";
+    tam = aux.length();
+    display.setCursor(25, 30); // Start at top-left corner
+    display.setTextSize(2);
+    for (int i = 0; i < tam; i++)
+    {
+      display.print(aux[i]);
+      display.display();
+      delay(10);
+    }
+    display.cp437(true);
+    display.write(248);
+    display.display();
+    delay(70);
+    display.print("C");
+    display.display();
+    //----
     time1 = time2;
+    MLX90614_object_temp += 0.1;
+    if (MLX90614_object_temp > 23.9)
+    {
+      MLX90614_object_temp = 21.1;
+    }
   }
   //////////////////////////////////////////////
 
@@ -57,6 +119,6 @@ void loop()
     Send_UDP(IP_remote, PORT_remote, Paquete);
     // flag_measure = 1;
     timer_http_3 = timer_http_4;
-      Serial.print("Envio: "+Paquete);
+    Serial.print("Envio: " + Paquete);
   }
 }
