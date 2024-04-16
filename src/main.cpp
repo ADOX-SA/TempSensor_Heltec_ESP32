@@ -17,6 +17,7 @@ float redondear(float valor, int decimales)
 #include "oled_esp32.h"
 #include "UDP_functions.h"
 #include "Sensor_MLX90614.h"
+#include "I2C_scanner.h"
 
 void setup()
 {
@@ -36,7 +37,12 @@ void setup()
     delay(100);
     Serial.print('.');
   }
-  MLX90614_object_temp = 21.1;
+  // MLX90614_object_temp = 21.1;
+
+  I2C_scanner();
+  
+
+  MLX90614_begin();
 
   pinMode(pin_led, OUTPUT);
 }
@@ -57,16 +63,16 @@ void loop()
   int time2 = millis();
   if ((time2 - time1) > 5000)
   {
-    /*
-        for (int i = 0; i < 7; i++)
-        {
-          digitalWrite(pin_led, 1);
-          delay(25);
 
-          digitalWrite(pin_led, 0);
-          delay(25);
-        }
-        */
+    for (int i = 0; i < 7; i++)
+    {
+      digitalWrite(pin_led, 1);
+      delay(25);
+
+      digitalWrite(pin_led, 0);
+      delay(25);
+    }
+
     //---
     display.clearDisplay();
     display.display();
@@ -102,11 +108,12 @@ void loop()
     display.display();
     //----
     time1 = time2;
-    MLX90614_object_temp += 0.1;
+    /*MLX90614_object_temp += 0.1;
     if (MLX90614_object_temp > 23.9)
     {
       MLX90614_object_temp = 21.1;
     }
+    */
   }
   //////////////////////////////////////////////
 
@@ -119,6 +126,7 @@ void loop()
     Send_UDP(IP_remote, PORT_remote, Paquete);
     // flag_measure = 1;
     timer_http_3 = timer_http_4;
-    Serial.print("Envio: " + Paquete);
+    // Serial.print("Envio: " + Paquete);
+    MLX90614_read();
   }
 }
