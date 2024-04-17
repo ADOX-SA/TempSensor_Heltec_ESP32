@@ -12,7 +12,7 @@
 WiFiUDP UDP;
 
 IPAddress IP_remote(192, 168, 1, 5); // Dirección IP estática del NodeMCU AP;
-unsigned int PORT_remote = 8005;
+unsigned int PORT_remote = 8004;
 
 /**
        * @brief Send data using UDP.

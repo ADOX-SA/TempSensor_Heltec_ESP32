@@ -18,6 +18,8 @@ float redondear(float valor, int decimales)
 #include "UDP_functions.h"
 #include "Sensor_MLX90614.h"
 #include "I2C_scanner.h"
+#include "Timer_tic.h"
+#include "battery_functions.h"
 
 void setup()
 {
@@ -39,12 +41,12 @@ void setup()
   }
   // MLX90614_object_temp = 21.1;
 
-  I2C_scanner();
-  
+  // I2C_scanner();
 
   MLX90614_begin();
-
+  Timer_begin();
   pinMode(pin_led, OUTPUT);
+  battery_config();
 }
 
 void loop()
@@ -58,20 +60,79 @@ void loop()
     Serial.print("\nLoop!");
   }
 
-  //////////////////////////////////////////////
-  static int time1 = millis();
-  int time2 = millis();
-  if ((time2 - time1) > 5000)
+  if (!MLX90614_tic)
   {
+    MLX90614_read();
+    MLX90614_tic = 500;
+  }
 
-    for (int i = 0; i < 7; i++)
-    {
-      digitalWrite(pin_led, 1);
-      delay(25);
+  //////////////////////////////////////////////
+  if (!battery_tic)
+  {
+    battery_tic = 4000;
+    battery_read();
 
-      digitalWrite(pin_led, 0);
-      delay(25);
-    }
+    display.clearDisplay();
+    display.display();
+    //-
+    display.drawRect(0, 0, 128, 64, SSD1306_WHITE);
+    //-
+    String aux = "Bateria";
+    display.setCursor(10, 5); // Start at top-left corner
+    display.setTextSize(2);
+    display.print(aux);
+    display.setCursor(25, 30); // Start at top-left corner
+    display.print(battery_value);
+    display.print(" V");
+
+    display.display();
+    delay(4000);
+    battery_tic = 4000;
+  }
+
+  //////////////////////////////////////////////
+  // if ((last_MLX90614_ambient_temp != MLX90614_ambient_temp) || (last_MLX90614_object_temp != MLX90614_object_temp))
+  if (last_MLX90614_object_temp != MLX90614_object_temp)
+  {
+    last_MLX90614_object_temp = MLX90614_object_temp;
+
+    String aux = String(MLX90614_object_temp, 1) + " ";
+    int tam = aux.length();
+    display.setCursor(25, 30); // Start at top-left corner
+    display.setTextSize(2);
+    display.setTextColor(SSD1306_BLACK);
+    // display.fillRect(25, 30, 50, 25, SSD1306_BLACK);
+    display.cp437(true);
+    display.write(219);
+    display.write(219);
+    display.write(219);
+    display.write(219);
+    display.write(219);
+    display.display();
+
+    display.setCursor(25, 30); // Start at top-left corner
+    display.setTextColor(SSD1306_WHITE);
+    display.print(aux);
+    // display.cp437(true);
+    // display.write(248);
+    // display.print("C");
+    display.display();
+  }
+
+  //////////////////////////////////////////////
+  if (!oled_efect_1_tic)
+  {
+    oled_efect_1_tic = 10000;
+    /*
+        for (int i = 0; i < 7; i++)
+        {
+          digitalWrite(pin_led, 1);
+          delay(25);
+
+          digitalWrite(pin_led, 0);
+          delay(25);
+        }
+        */
 
     //---
     display.clearDisplay();
@@ -106,26 +167,16 @@ void loop()
     delay(70);
     display.print("C");
     display.display();
-    //----
-    time1 = time2;
-    /*MLX90614_object_temp += 0.1;
-    if (MLX90614_object_temp > 23.9)
-    {
-      MLX90614_object_temp = 21.1;
-    }
-    */
   }
+
   //////////////////////////////////////////////
 
-  static int timer_http_3 = millis();
-  int timer_http_4 = millis();
-
-  if ((timer_http_4 - timer_http_3) > 3000)
+  if (!send_UDP_tic)
   {
+    send_UDP_tic = 3000;
     String Paquete = "temperature=" + String(MLX90614_object_temp) + "&battery_state=A Bateria";
     Send_UDP(IP_remote, PORT_remote, Paquete);
     // flag_measure = 1;
-    timer_http_3 = timer_http_4;
     // Serial.print("Envio: " + Paquete);
     MLX90614_read();
   }
