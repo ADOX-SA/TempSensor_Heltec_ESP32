@@ -45,8 +45,8 @@ void setup()
 
   MLX90614_begin();
   Timer_begin();
-  pinMode(pin_led, OUTPUT);
   battery_config();
+  pinMode(pin_led, OUTPUT);
 }
 
 void loop()
@@ -55,7 +55,6 @@ void loop()
   static int x = 1;
   if (x)
   {
-
     x = 0;
     Serial.print("\nLoop!");
   }
