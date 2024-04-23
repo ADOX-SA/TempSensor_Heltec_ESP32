@@ -1,9 +1,12 @@
 #include <Arduino.h>
 String firmVer = "1.1";
-String oled_modo = "Receptor";
+
+const String SensorID = String((uint16_t)((ESP.getEfuseMac()) >> 32), HEX);
+
+// uint64_t chipId=ESP.getEfuseMac();
+// Serial.printf("ESP32ChipID=%04X",(uint16_t)(chipId>>32));//print High 2bytes
 
 #include "EEPROM.h"
-#include <WiFi.h>
 
 int pin_led = 35;
 
@@ -20,6 +23,7 @@ float redondear(float valor, int decimales)
 #include "I2C_scanner.h"
 #include "Timer_tic.h"
 #include "battery_functions.h"
+#include "WiFi_functions.h"
 
 void setup()
 {
@@ -29,17 +33,8 @@ void setup()
   // initialize SX1262 with default settings
   Serial.print("Inicianco... ");
 
-  // Connect WiFi:
-  WiFi.mode(WIFI_STA);
-  WiFi.begin("temperatured", "tempred2311");
-  int c = 0;
-  while ((WiFi.status() != WL_CONNECTED) && c < 50)
-  {
-    c++;
-    delay(100);
-    Serial.print('.');
-  }
-  // MLX90614_object_temp = 21.1;
+  ESP32_setup_wifi();
+  ESP32_modoconf();
 
   // I2C_scanner();
 
@@ -52,12 +47,7 @@ void setup()
 void loop()
 {
 
-  static int x = 1;
-  if (x)
-  {
-    x = 0;
-    Serial.print("\nLoop!");
-  }
+  ESP32_loop();
 
   if (!MLX90614_tic)
   {
