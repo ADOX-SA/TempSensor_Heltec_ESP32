@@ -26,11 +26,11 @@ void battery_read()
     const int R1 = 390;
     const int R2 = 100;
     // Calibration measurements
-    const float measuredVoltage = 4.2;
-    const float reportedVoltage = 4.095;
+    const float measuredVoltage = 4.21; // Medicion tester
+    const float reportedVoltage = 4.16; //Medicion ADC
     // Calibration factor
-    //const float factor = (adcMaxVoltage / adcMax) * ((R1 + R2) / (float)R2) * (measuredVoltage / reportedVoltage);
-    const float factor = (adcMaxVoltage / adcMax) * ((R1 + R2) / (float)R2);
+    const float factor = (adcMaxVoltage / adcMax) * ((R1 + R2) / (float)R2) * (measuredVoltage / reportedVoltage);
+    //const float factor = (adcMaxVoltage / adcMax) * ((R1 + R2) / (float)R2);
     digitalWrite(ADC_Ctrl, LOW);
     delay(100);
     int analogValue = analogRead(VBAT_Read);

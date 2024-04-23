@@ -6,7 +6,6 @@ const String SensorID = String((uint16_t)((ESP.getEfuseMac()) >> 32), HEX);
 // uint64_t chipId=ESP.getEfuseMac();
 // Serial.printf("ESP32ChipID=%04X",(uint16_t)(chipId>>32));//print High 2bytes
 
-#include "EEPROM.h"
 
 int pin_led = 35;
 
@@ -17,13 +16,15 @@ float redondear(float valor, int decimales)
   return (roundf(valor * _potencia) / _potencia);
 };
 
-#include "oled_esp32.h"
-#include "UDP_functions.h"
-#include "Sensor_MLX90614.h"
-#include "I2C_scanner.h"
-#include "Timer_tic.h"
-#include "battery_functions.h"
-#include "WiFi_functions.h"
+#include "Adox_Libraries_ESP32/oled_esp32.h"
+#include "Adox_Libraries_ESP32/UDP_functions.h"
+#include "Adox_Libraries_ESP32/Sensor_MLX90614.h"
+#include "Adox_Libraries_ESP32/I2C_scanner.h"
+#include "Adox_Libraries_ESP32/Timer_tic.h"
+#include "Adox_Libraries_ESP32/EEPROM_functions.h"
+#include "Adox_Libraries_ESP32/battery_functions.h"
+#include "Adox_Libraries_ESP32/WiFi_functions.h"
+#include "Adox_Libraries_ESP32/SPIFFS_functions.h"
 
 void setup()
 {
@@ -33,8 +34,13 @@ void setup()
   // initialize SX1262 with default settings
   Serial.print("Inicianco... ");
 
+  ESP32_eeprom_begin();
+
   ESP32_setup_wifi();
   ESP32_modoconf();
+
+  ESP32_spiffs_begin();
+  //ESP32_spiffs_write();
 
   // I2C_scanner();
 

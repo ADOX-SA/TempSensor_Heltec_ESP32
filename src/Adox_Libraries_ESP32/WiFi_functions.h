@@ -11,7 +11,10 @@ const char *ssid = "Awifi";    // Tu SSID
 const char *pass = "Adox2369"; // Tu Clave
 void leer(int);
 WebServer server(80);
-void Index();
+
+//---> Functions definitions.
+void ESP32_Index();
+void ESP32_File_Download();
 void ESP32_loop();
 
 void ESP32_setup_wifi()
@@ -48,8 +51,8 @@ void ESP32_setup_wifi()
 void ESP32_modoconf()
 {
 
-    // WebServer.on("/", Index); // Index
-    server.on("/", Index); // Index
+    server.on("/", ESP32_Index); // Index
+    server.on("/download", ESP32_File_Download);
 
     /*WebServer.on("/wifi", Wificonf); // Configuración WiFi
 
@@ -68,7 +71,7 @@ void ESP32_modoconf()
     if (SPIFFS.format()) WebServer.send(200, "text/plain", "Memoria borrada OK");
     else WebServer.send(200, "text/plain", "Error al borrar Memoria"); });
 
-    WebServer.on("/download", File_Download);
+    
     WebServer.on("/date", Config_Date);
     WebServer.on("/sensed", Config_Sensed);
     WebServer.on("/config_mqtt", Config_mqtt);
@@ -79,7 +82,7 @@ void ESP32_modoconf()
     server.begin();
 }
 
-void Index()
+void ESP32_Index()
 {
 
     Serial.print("Index");
@@ -107,4 +110,6 @@ void ESP32_loop()
     server.handleClient();
 }
 
-void ESP32_spiffs(){}
+void ESP32_File_Download(){
+
+}
