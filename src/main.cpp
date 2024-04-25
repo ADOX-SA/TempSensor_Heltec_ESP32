@@ -6,7 +6,6 @@ const String SensorID = String((uint16_t)((ESP.getEfuseMac()) >> 32), HEX);
 // uint64_t chipId=ESP.getEfuseMac();
 // Serial.printf("ESP32ChipID=%04X",(uint16_t)(chipId>>32));//print High 2bytes
 
-
 int pin_led = 35;
 
 // --- Redondear una float o una double
@@ -40,7 +39,11 @@ void setup()
   ESP32_modoconf();
 
   ESP32_spiffs_begin();
-  //ESP32_spiffs_write();
+
+  for (int i = 0; i < 6; i++)
+  {
+    ESP32_spiffs_write();
+  }
 
   // I2C_scanner();
 
