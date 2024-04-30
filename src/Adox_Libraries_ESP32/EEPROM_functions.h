@@ -5,8 +5,17 @@ int dir_pass = 50;
 int dir_vbat_max = 100;
 int dir_vbat_min = 150;
 
+void eeprom_write(int, String);
+String eeprom_read(int addr);
+
 //----------------Función para inicializar EEPROM-------------------
-void ESP32_eeprom_begin() {}
+void ESP32_eeprom_begin()
+{
+  EEPROM.begin(512);
+  eeprom_read(dir_ssid).toCharArray(ssid, 50);
+  eeprom_read(dir_pass).toCharArray(pass, 50);
+  //Serial.print("EEPROM_begin: "+eeprom_read(dir_ssid)+", "+eeprom_read(dir_pass));
+}
 
 //----------------Función para grabar en la EEPROM-------------------
 void eeprom_write(int addr, String a)

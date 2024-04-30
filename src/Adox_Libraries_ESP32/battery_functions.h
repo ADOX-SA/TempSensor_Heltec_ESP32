@@ -2,7 +2,7 @@
 
 float battery_value = -1;
 int battery_percentage = -1;
-#define battery_max_value 4.2
+#define battery_max_value 4.1
 #define battery_min_value 3.2
 
 #define VBAT_Read 1

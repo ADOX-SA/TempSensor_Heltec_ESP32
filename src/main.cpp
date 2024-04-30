@@ -1,6 +1,10 @@
 #include <Arduino.h>
 String firmVer = "1.1";
 
+/* Añade tu SSID & Clave para acceder a tu Wifi */
+char ssid[50];
+char pass[50];
+
 const String SensorID = String((uint16_t)((ESP.getEfuseMac()) >> 32), HEX);
 
 // uint64_t chipId=ESP.getEfuseMac();
@@ -15,15 +19,16 @@ float redondear(float valor, int decimales)
   return (roundf(valor * _potencia) / _potencia);
 };
 
-#include "Adox_Libraries_ESP32/oled_esp32.h"
 #include "Adox_Libraries_ESP32/UDP_functions.h"
 #include "Adox_Libraries_ESP32/Sensor_MLX90614.h"
 #include "Adox_Libraries_ESP32/I2C_scanner.h"
 #include "Adox_Libraries_ESP32/Timer_tic.h"
 #include "Adox_Libraries_ESP32/EEPROM_functions.h"
 #include "Adox_Libraries_ESP32/battery_functions.h"
-#include "Adox_Libraries_ESP32/WiFi_functions.h"
 #include "Adox_Libraries_ESP32/SPIFFS_functions.h"
+#include "Adox_Libraries_ESP32/WiFi/WiFi_functions.h"
+#include "Adox_Libraries_ESP32/oled_esp32.h"
+#include "Adox_Libraries_ESP32/Serial_functions.h"
 
 void setup()
 {
@@ -38,10 +43,9 @@ void setup()
   ESP32_setup_wifi();
   ESP32_modoconf();
 
-  //ESP32_spiffs_begin();
+  // ESP32_spiffs_begin();
 
-    //ESP32_spiffs_write();
-  
+  // ESP32_spiffs_write();
 
   // I2C_scanner();
 
@@ -53,12 +57,12 @@ void setup()
 
 void loop()
 {
-
+  Serial_read_wifi(); // Para grabar ssid y pass por puerto serie.
   ESP32_loop();
 
   if (!MLX90614_tic)
   {
-    MLX90614_read();
+    // MLX90614_read();
     MLX90614_tic = 500;
   }
 
@@ -67,32 +71,18 @@ void loop()
   {
     battery_tic = 4000;
     battery_read();
+    oled_battery();
+  }
 
-    display.clearDisplay();
-    display.display();
-    //-
-    display.drawRect(0, 0, 128, 64, SSD1306_WHITE);
-    //-
-    String aux = "Bateria";
-    display.setCursor(10, 5); // Start at top-left corner
-    display.setTextSize(1);
-    display.print(aux);
-    display.setTextSize(2);
-    display.setCursor(25, 20); // Start at top-left corner
-    display.print(battery_value);
-    display.print(" V");
-
-    display.setCursor(25, 40); // Start at top-left corner
-    display.print(battery_percentage);
-    display.print(" %");
-
-    display.display();
-    delay(4000);
-    battery_tic = 4000;
+  if (!oled_efect_1_tic)
+  {
+    oled_efect_1_tic = 10000;
+    oled_effect_1();
   }
 
   //////////////////////////////////////////////
   // if ((last_MLX90614_ambient_temp != MLX90614_ambient_temp) || (last_MLX90614_object_temp != MLX90614_object_temp))
+  /*
   if (last_MLX90614_object_temp != MLX90614_object_temp)
   {
     last_MLX90614_object_temp = MLX90614_object_temp;
@@ -119,66 +109,18 @@ void loop()
     // display.print("C");
     display.display();
   }
-
+*/
   //////////////////////////////////////////////
-  if (!oled_efect_1_tic)
-  {
-    oled_efect_1_tic = 10000;
-    /*
-        for (int i = 0; i < 7; i++)
-        {
-          digitalWrite(pin_led, 1);
-          delay(25);
-
-          digitalWrite(pin_led, 0);
-          delay(25);
-        }
-        */
-
-    //---
-    display.clearDisplay();
-    display.display();
-    //-
-    display.drawRect(0, 0, 128, 64, SSD1306_WHITE);
-    //-
-    String aux = "Measuring";
-    int tam = aux.length();
-    display.setCursor(10, 5); // Start at top-left corner
-    display.setTextSize(2);
-    for (int i = 0; i < tam; i++)
-    {
-      display.print(aux[i]);
-      display.display();
-      delay(35);
-    }
-    //-
-    aux = String(MLX90614_object_temp, 1) + " ";
-    tam = aux.length();
-    display.setCursor(25, 30); // Start at top-left corner
-    display.setTextSize(2);
-    for (int i = 0; i < tam; i++)
-    {
-      display.print(aux[i]);
-      display.display();
-      delay(10);
-    }
-    display.cp437(true);
-    display.write(248);
-    display.display();
-    delay(70);
-    display.print("C");
-    display.display();
-  }
-
   //////////////////////////////////////////////
-
-  if (!send_UDP_tic)
-  {
-    send_UDP_tic = 3000;
-    String Paquete = "temperature=" + String(MLX90614_object_temp) + "&battery_state=A Bateria";
-    Send_UDP(IP_remote, PORT_remote, Paquete);
-    // flag_measure = 1;
-    // Serial.print("Envio: " + Paquete);
-    MLX90614_read();
-  }
+  /*
+    if (!send_UDP_tic)
+    {
+      send_UDP_tic = 3000;
+      String Paquete = "temperature=" + String(MLX90614_object_temp) + "&battery_state=A Bateria";
+      Send_UDP(IP_remote, PORT_remote, Paquete);
+      // flag_measure = 1;
+      // Serial.print("Envio: " + Paquete);
+      MLX90614_read();
+    }
+    */
 }
