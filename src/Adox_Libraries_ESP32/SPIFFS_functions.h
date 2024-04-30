@@ -1,10 +1,9 @@
 #include <Arduino.h>
-#include <LittleFS.h>
-#define SPIFFS LittleFS
-#include <Wire.h>
+// #include <LittleFS.h>
+// #define SPIFFS LittleFS
 
-// #include <SPIFFS.h>
-// #include "FS.h"
+#include <SPIFFS.h>
+#include "FS.h"
 
 void ESP32_spiffs_begin()
 {
@@ -17,25 +16,31 @@ void ESP32_spiffs_begin()
     else
     {
 
+        // SPIFFS.format() ? Serial.print("Format") : Serial.print("NO Format");
 
-        SPIFFS.format() ? Serial.print("Format") : Serial.print("NO Format");
 
         File file = SPIFFS.open("/");
 
         String filename = "";
-        //Dir dir = SPIFFS.openDir("/");
+        // Dir dir = SPIFFS.openDir("/");
         long usedbytes = 0;
         Serial.println("\nSPIFFS");
-        int x=0;
-        while (file.openNextFile()) 
+        int x = 0;
+
+        while (file.openNextFile())
         {
+            if (file==NULL)
+            {
+                Serial.println(" - Es null boludo");
+            }
+            
             x++;
             usedbytes += file.size();
-            Serial.println(" - " +String(x)+" - " + String(file.name()) + " ," + String(file.size()) + "bytes");
+            Serial.println(" - " + String(x) + " - " + (*(file.name())) + " ," + String(file.size()) + "bytes");
         }
 
         float spiffs_percentage = ((float)(SPIFFS.usedBytes()) / (SPIFFS.totalBytes())) * 100;
-        Serial.println("total: "+String(usedbytes)+", %: " + String(spiffs_percentage));
+        Serial.println("total: " + String(usedbytes) + ", %: " + String(spiffs_percentage));
     }
     /*
         String filename = "";
@@ -82,11 +87,14 @@ void ESP32_spiffs_write()
         Serial.println("Error al abrir el archivo para escritura");
         return;
     }
+    else
+    {
+        // Escribe en el archivo
+        Serial.print("\nEscribi: ");
+        Serial.println(new_file.print("Hola matias: esta es una pruebaa con ESP32"));
+        new_file.print(x);
+        new_file.close();
 
-    // Escribe en el archivo
-    new_file.print("Hola matias: ");
-    new_file.print(x);
-    new_file.close();
-
-    Serial.println("Archivo creado: " + filename);
+        Serial.println("\nArchivo creado: " + filename);
+    }
 }

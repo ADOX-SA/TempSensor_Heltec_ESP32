@@ -38,12 +38,10 @@ void setup()
   ESP32_setup_wifi();
   ESP32_modoconf();
 
-  ESP32_spiffs_begin();
+  //ESP32_spiffs_begin();
 
-  for (int i = 0; i < 6; i++)
-  {
-    ESP32_spiffs_write();
-  }
+    //ESP32_spiffs_write();
+  
 
   // I2C_scanner();
 
@@ -77,11 +75,16 @@ void loop()
     //-
     String aux = "Bateria";
     display.setCursor(10, 5); // Start at top-left corner
-    display.setTextSize(2);
+    display.setTextSize(1);
     display.print(aux);
-    display.setCursor(25, 30); // Start at top-left corner
+    display.setTextSize(2);
+    display.setCursor(25, 20); // Start at top-left corner
     display.print(battery_value);
     display.print(" V");
+
+    display.setCursor(25, 40); // Start at top-left corner
+    display.print(battery_percentage);
+    display.print(" %");
 
     display.display();
     delay(4000);
