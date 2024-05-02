@@ -1,5 +1,5 @@
 #include <Arduino.h>
-String firmVer = "1.1";
+String firmVer = "1.8T";
 
 /* Añade tu SSID & Clave para acceder a tu Wifi */
 char ssid[50];
@@ -58,7 +58,7 @@ void setup()
 void loop()
 {
   Serial_read_wifi(); // Para grabar ssid y pass por puerto serie.
-  ESP32_loop();
+  ESP32_loop(); // Recibe peticiones.
 
   if (!MLX90614_tic)
   {

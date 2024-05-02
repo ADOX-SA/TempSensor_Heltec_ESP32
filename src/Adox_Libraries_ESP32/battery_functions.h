@@ -3,7 +3,7 @@
 float battery_value = -1;
 int battery_percentage = -1;
 #define battery_max_value 4.1
-#define battery_min_value 3.2
+#define battery_min_value 3.7
 
 #define VBAT_Read 1
 #define ADC_Ctrl 37
@@ -46,7 +46,11 @@ void battery_read()
     {
         battery_percentage = 100;
     }
+    else if (battery_percentage < 1)
+    {
+        battery_percentage = 1;
+    }
 
-    Serial.print("Battery: " + String(battery_value) + " V, Vin: " + String(voltage) + " mV");
-    Serial.print(", %: " + String(battery_percentage));
+    //Serial.print("Battery: " + String(battery_value) + " V, Vin: " + String(voltage) + " mV");
+    //Serial.println(", %: " + String(battery_percentage));
 }

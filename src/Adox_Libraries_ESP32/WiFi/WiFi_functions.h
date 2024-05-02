@@ -3,14 +3,18 @@
  * Librerias necesarias para conectarnos a un entorno Wifi y poder configurar
  * un servidor WEB
  */
+#include <Arduino.h>
 #include <WiFi.h>
-#include <WebServer.h>
+
+#include "WiFi_update.h"
+//#include <WebServer.h>
 #include "HTML_code.h"
 
 
 String mensaje = "";
 void leer(int);
 WebServer server(80);
+HTTPUpdateServer updater;
 
 //---> Functions definitions.
 void ESP32_Index();
@@ -19,6 +23,7 @@ void ESP32_loop();
 void ESP32_Wificonf();
 void ESP32_guardar_conf();
 void ESP32_escanear();
+void ESP32_Config_Date();
 
 void ESP32_setup_wifi()
 {
@@ -49,11 +54,15 @@ void ESP32_setup_wifi()
         Serial.println("Error de conexion");
         contconexion = 0;
     }
+
+    
+    
 }
 
 void ESP32_modoconf()
 {
-
+    updater.setup(&server,"/update");
+    
     server.on("/", ESP32_Index); // Index
     server.on("/download", ESP32_File_Download);
 
@@ -62,11 +71,10 @@ void ESP32_modoconf()
     server.on("/guardar_conf", ESP32_guardar_conf); // Graba en la eeprom la configuracion
     server.on("/escanear", ESP32_escanear);         // Escanean las redes wifi disponibles
 
+    /* Configuracion de la fecha */
+    server.on("/date", ESP32_Config_Date);
     /*
-                                                     WebServer.on("/guardar_conf", guardar_conf); // Graba en la eeprom la configuracion
-
-                                                     WebServer.on("/escanear", escanear); // Escanean las redes wifi disponibles
-
+                                                     
                                                      WebServer.on("/ultimodato", UltimoDatoEnviado); // Podemos ver el ultimo dato enviado
 
                                                      WebServer.on("/envio", DatoEnviado); // Enviar un dato
@@ -79,7 +87,7 @@ void ESP32_modoconf()
                                                      else WebServer.send(200, "text/plain", "Error al borrar Memoria"); });
 
 
-                                                     WebServer.on("/date", Config_Date);
+                                                     
                                                      WebServer.on("/sensed", Config_Sensed);
                                                      WebServer.on("/config_mqtt", Config_mqtt);
 
@@ -183,4 +191,35 @@ void ESP32_escanear()
         ESP32_Wificonf();
         mensaje = "";
     }
+}
+
+void ESP32_Config_Date()
+{ // This gets called twice, the first pass selects the input, the second pass then processes the command line arguments
+  if (server.args() > 0)
+  { // Arguments were received
+    //if (server.hasArg("currentDateTime"))
+      //Set_Date_Time(server.arg(0));
+  }
+  else
+  {
+    // SendHTML_Header();
+    String webpage = "";
+    webpage += F("<h2>Ajustar Fecha y Hora</h2>");
+
+    //DateTime now = rtc.now();
+    //webpage += F("<p>Fecha y Hora actual: ") + now.timestamp(DateTime::TIMESTAMP_DATE) + F("&nbsp;&nbsp;&nbsp;&nbsp;") + now.timestamp(DateTime::TIMESTAMP_TIME) + F("</p>");
+    webpage += F("<p>Fecha y Hora actual: arreglar esto</p>");
+    webpage += F("<p>Seleccione nueva Fecha y Hora: </p>");
+    webpage += F("<FORM action='/date'>"); // Must match the calling argument e.g. '/chart' calls '/chart' after selection but with arguments!
+    webpage += F("<input type='datetime-local' id='currentDateTime' name='currentDateTime'>");
+    webpage += F("<input type='submit'><br>");
+    webpage += F("<a href='/'>[Back]</a><br><br>");
+
+    webpage += F("</FORM></body></html>");
+
+    // SendHTML_Content();
+    // SendHTML_Stop();
+
+    server.send(200, "text/html", HTML_HEADER + webpage + HTML_END);
+  }
 }

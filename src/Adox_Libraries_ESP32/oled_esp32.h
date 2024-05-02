@@ -226,5 +226,4 @@ void oled_battery()
   display.print(" %");
 
   display.display();
-  delay(4000);
-}
+  }
