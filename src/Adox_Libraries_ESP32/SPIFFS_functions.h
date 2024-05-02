@@ -28,12 +28,7 @@ void ESP32_spiffs_begin()
         int x = 0;
 
         while (file.openNextFile())
-        {
-            if (file==NULL)
-            {
-                Serial.println(" - Es null boludo");
-            }
-            
+        {        
             x++;
             usedbytes += file.size();
             Serial.println(" - " + String(x) + " - " + (*(file.name())) + " ," + String(file.size()) + "bytes");

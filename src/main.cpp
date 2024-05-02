@@ -1,5 +1,5 @@
 #include <Arduino.h>
-String firmVer = "1.8T";
+String firmVer = "1.0";
 
 /* Añade tu SSID & Clave para acceder a tu Wifi */
 char ssid[50];
@@ -30,6 +30,10 @@ float redondear(float valor, int decimales)
 #include "Adox_Libraries_ESP32/oled_esp32.h"
 #include "Adox_Libraries_ESP32/Serial_functions.h"
 
+//-----> MQTT
+#include "Adox_Libraries_ESP32/mqtt/MqttLibrary.h"
+mqtt_wifi mq;
+
 void setup()
 {
   Serial.begin(115200);
@@ -49,6 +53,9 @@ void setup()
 
   // I2C_scanner();
 
+  //mqtt:
+  mq.begin();
+
   MLX90614_begin();
   Timer_begin();
   battery_config();
@@ -57,6 +64,7 @@ void setup()
 
 void loop()
 {
+  mq.loop(); //Peticiones de mqtt
   Serial_read_wifi(); // Para grabar ssid y pass por puerto serie.
   ESP32_loop(); // Recibe peticiones.
 

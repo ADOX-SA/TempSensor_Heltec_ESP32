@@ -32,7 +32,7 @@ void battery_read()
     const float factor = (adcMaxVoltage / adcMax) * ((R1 + R2) / (float)R2) * (measuredVoltage / reportedVoltage);
     // const float factor = (adcMaxVoltage / adcMax) * ((R1 + R2) / (float)R2);
     digitalWrite(ADC_Ctrl, LOW);
-    delay(100);
+    delay(1);
     int analogValue = analogRead(VBAT_Read);
     digitalWrite(ADC_Ctrl, HIGH);
 

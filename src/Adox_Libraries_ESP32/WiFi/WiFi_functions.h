@@ -62,7 +62,7 @@ void ESP32_setup_wifi()
 void ESP32_modoconf()
 {
     updater.setup(&server,"/update");
-    
+
     server.on("/", ESP32_Index); // Index
     server.on("/download", ESP32_File_Download);
 
@@ -106,6 +106,7 @@ void ESP32_Index()
     webpage += ("<h2>Chip ID: ") + SensorID + ("</h2>");
     webpage += ("<h2>Version: ") + firmVer + ("</h2>");
     webpage += ("<h3> Queda mucho por agregar </h3>");
+    webpage += ("<h3> Pero ya tenemos el /update :) </h3>");
     // pagina += F("<h3>Cambios: ") + version_changes + F("</h3>");
 
     server.send(200, "text/html", HTML_HEADER + webpage + HTML_END);
