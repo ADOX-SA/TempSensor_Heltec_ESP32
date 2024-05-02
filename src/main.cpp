@@ -40,7 +40,9 @@ void setup()
   oled_esp32_begin();
   oled_init();
   // initialize SX1262 with default settings
-  Serial.print("Inicianco... ");
+  Serial.println("Iniciando... ");
+
+  Serial.println("CHIP ID: " + String((uint16_t)((ESP.getEfuseMac()) >> 32), HEX));
 
   ESP32_eeprom_begin();
 
@@ -48,13 +50,13 @@ void setup()
   ESP32_modoconf();
 
   // ESP32_spiffs_begin();
-
   // ESP32_spiffs_write();
 
   // I2C_scanner();
 
-  //mqtt:
+  // mqtt:
   mq.begin();
+  //mq.set_wifi(ssid,pass);
 
   MLX90614_begin();
   Timer_begin();
@@ -64,9 +66,9 @@ void setup()
 
 void loop()
 {
-  mq.loop(); //Peticiones de mqtt
+  mq.loop();          // Peticiones de mqtt
   Serial_read_wifi(); // Para grabar ssid y pass por puerto serie.
-  ESP32_loop(); // Recibe peticiones.
+  ESP32_loop();       // Recibe peticiones.
 
   if (!MLX90614_tic)
   {

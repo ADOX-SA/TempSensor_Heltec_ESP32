@@ -5,6 +5,13 @@
 
 #include <Arduino.h>
 #include <PubSubClient.h>
+
+/**
+ * Si trabajo con ESP8266 incluir:
+ * #include <ESP8266WiFi.h>
+ * Si trabajo con ESP32 incluir:
+ * #include <WiFi.h>
+ */
 #include <WiFi.h>
 
 #include "MqttData.h"

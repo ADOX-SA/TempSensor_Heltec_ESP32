@@ -12,8 +12,6 @@
  * mq.loop();
  */
 
-
-
 #include "MqttLibrary.h"
 
 void mqtt_wifi::callback(char *topic, byte *payload, int length)
@@ -40,7 +38,7 @@ void mqtt_wifi::callback(char *topic, byte *payload, int length)
 
 mqtt_wifi::mqtt_wifi() : mqttClient(esp8266Client)
 {
-    server_ip.fromString("143.198.229.75");
+    server_ip.fromString(mqtt_server_ip);
     mqttClient.setServer(server_ip, port);
     // mqttClient.setCallback(callback); // Genera error debido a que callback no es una funcion estatica.
     mqttClient.setCallback([&](char *topic, byte *payload, unsigned int length)

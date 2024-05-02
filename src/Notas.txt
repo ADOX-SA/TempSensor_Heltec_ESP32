@@ -1,0 +1,12 @@
+lista de comandos mqtt:
+<update: //busca la version en filezilla
+"<reset>"
+"<recirculate>"
+<datos_set_time:
+<topic_change:
+<data>
+<info>
+<ssid:
+<pass:
+<wifi_data>
+
