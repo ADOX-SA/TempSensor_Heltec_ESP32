@@ -1,16 +1,6 @@
 #include <Arduino.h>
-String firmVer = "1.0";
 
-/* Añade tu SSID & Clave para acceder a tu Wifi */
-char ssid[50];
-char pass[50];
-
-const String SensorID = String((uint16_t)((ESP.getEfuseMac()) >> 32), HEX);
-
-// uint64_t chipId=ESP.getEfuseMac();
-// Serial.printf("ESP32ChipID=%04X",(uint16_t)(chipId>>32));//print High 2bytes
-
-int pin_led = 35;
+#include "global_variables.h"
 
 // --- Redondear una float o una double
 float redondear(float valor, int decimales)
@@ -45,6 +35,8 @@ void setup()
   Serial.println("CHIP ID: " + String((uint16_t)((ESP.getEfuseMac()) >> 32), HEX));
 
   ESP32_eeprom_begin();
+  eeprom_read(dir_ssid).toCharArray(ssid, 50);
+  eeprom_read(dir_pass).toCharArray(pass, 50);
 
   ESP32_setup_wifi();
   ESP32_modoconf();
@@ -56,7 +48,7 @@ void setup()
 
   // mqtt:
   mq.begin();
-  mq.set_wifi(ssid, pass);
+  mq.set_wifi(ssid, dir_ssid, pass, dir_pass);
   // mq.set_wifi(ssid,pass);
 
   MLX90614_begin();

@@ -38,14 +38,16 @@ void mqtt_wifi::callback(char *topic, byte *payload, int length)
 
 void mqtt_wifi::config_topic()
 {
+    topic_name = _eeprom_read(dir_topic);
+    Serial.print("\n----------Lei: " + topic_name);
     if (topic_name == "")
     {
         topic_name = String(((ESP.getEfuseMac()) >> 32), HEX);
     }
     client_name = topic_prefix + String("_") + topic_name;
     topic = topic_prefix + String("/") + topic_name;
-    Serial.print("\nZ[Topic]: " + topic);
-    Serial.print("\nZ[Client]: " + client_name);
+    Serial.print("\n[Topic]: " + topic);
+    Serial.print("\n[Client]: " + client_name);
 }
 
 mqtt_wifi::mqtt_wifi() : mqttClient(esp8266Client)
@@ -56,8 +58,7 @@ mqtt_wifi::mqtt_wifi() : mqttClient(esp8266Client)
     mqttClient.setCallback([&](char *topic, byte *payload, unsigned int length)
                            { callback(topic, payload, length); });
 
-
-    config_topic();
+    _eeprom_begin();
 }
 
 void mqtt_wifi::begin(String _user, String _pass)
@@ -65,6 +66,7 @@ void mqtt_wifi::begin(String _user, String _pass)
     user = _user;
     pass = _pass;
 
+    config_topic();
     reconnect();
 
     Serial.println("MQTT: ");
@@ -110,6 +112,35 @@ bool mqtt_wifi::set_wifi(char *_ssid, char *_pass)
         p_pass = _pass;
         ret = true;
     }
+    return ret;
+}
+
+bool mqtt_wifi::set_wifi(char *_ssid, int _addr_ssid, char *_pass, int _addr_pass)
+{
+    bool ret = false;
+    if ((_ssid != NULL) && (_pass != NULL))
+    {
+        p_ssid = _ssid;
+        p_pass = _pass;
+        ret = true;
+    }
+    else
+    {
+        Serial.print("\n[MQTT]: ssid/pass error");
+        ret = false;
+    }
+    if ((_addr_ssid != -1) && (_addr_pass != -1))
+    {
+        dir_ssid = _addr_ssid;
+        dir_pass = _addr_pass;
+        ret = true;
+    }
+    else
+    {
+        Serial.print("\n[MQTT]: dir_ssid/dir_pass error");
+        ret = false;
+    }
+
     return ret;
 }
 
@@ -164,6 +195,7 @@ void mqtt_wifi::commands(String s_received)
             {
                 strcpy(p_datos_set_time, s.c_str());
                 // grabar(dir_datos_set, datos_set);
+                _eeprom_write(dir_datos_set_time, s);
                 send(("actualizado. Intervalo: " + s).c_str());
             }
             else
@@ -185,7 +217,7 @@ void mqtt_wifi::commands(String s_received)
 
         // grabar(dir_mqtt_topic_name, s);
         topic_name = s;
-
+        _eeprom_write(dir_topic, s);
         Serial.print("\nNew topic:\"" + s + "\"");
 
         config_topic();
@@ -220,7 +252,7 @@ void mqtt_wifi::commands(String s_received)
         String s = s_received.substring(6, x);
 
         strcpy(p_ssid, s.c_str()); //* Guardo en ssid lo recibido.
-
+        _eeprom_write(dir_ssid, s);
         // Guardo el valor recibido:
         /*grabar(0, s);
         delay(30);
@@ -234,7 +266,7 @@ void mqtt_wifi::commands(String s_received)
         String s = s_received.substring(6, x);
 
         strcpy(p_pass, s.c_str());
-
+        _eeprom_write(dir_pass, s);
         Serial.print("\nNew pass:\"" + String(s) + "\"");
 
         // Guardo el valor recibido:
@@ -264,4 +296,54 @@ void mqtt_wifi::commands(String s_received)
             // mqttClient_SIM800.publish((mqtt_prefix_topic + "/" + mqtt_topic_name + "/data").c_str(), (aux.c_str()));
         }
     }
+}
+
+//----------------Función para inicializar EEPROM-------------------
+void mqtt_wifi::_eeprom_begin()
+{
+
+    // EEPROM.begin(512);
+    //  eeprom_read(dir_ssid).toCharArray(ssid, 50);
+    //  eeprom_read(dir_pass).toCharArray(pass, 50);
+    //  Serial.print("EEPROM_begin: "+eeprom_read(dir_ssid)+", "+eeprom_read(dir_pass));
+}
+
+//----------------Función para grabar en la EEPROM-------------------
+void mqtt_wifi::_eeprom_write(int addr, String a)
+{
+    if (addr != -1)
+    {
+        int tamano = a.length();
+        char inchar[50];
+        a.toCharArray(inchar, tamano + 1);
+        for (int i = 0; i < tamano; i++)
+        {
+            EEPROM.write(addr + i, inchar[i]);
+        }
+        for (int i = tamano; i < 50; i++)
+        {
+            EEPROM.write(addr + i, 255);
+        }
+        EEPROM.commit();
+    }
+    else
+    {
+        Serial.print("\n[EEPROM]: wrong address");
+    }
+}
+
+//-----------------Función para leer la EEPROM------------------------
+String mqtt_wifi::_eeprom_read(int addr)
+{
+    byte lectura;
+    String strlectura;
+    for (int i = addr; i < addr + 50; i++)
+    {
+        lectura = EEPROM.read(i);
+        if (lectura != 255)
+        {
+            strlectura += (char)lectura;
+        }
+    }
+    return strlectura;
 }
