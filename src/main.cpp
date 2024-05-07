@@ -56,7 +56,8 @@ void setup()
 
   // mqtt:
   mq.begin();
-  //mq.set_wifi(ssid,pass);
+  mq.set_wifi(ssid, pass);
+  // mq.set_wifi(ssid,pass);
 
   MLX90614_begin();
   Timer_begin();
@@ -76,7 +77,6 @@ void loop()
     MLX90614_tic = 500;
   }
 
-  //////////////////////////////////////////////
   if (!battery_tic)
   {
     battery_tic = 4000;
@@ -88,6 +88,7 @@ void loop()
   {
     oled_efect_1_tic = 10000;
     oled_effect_1();
+    Serial.print("\nCONEXION: " + String(ssid) + ", " + String(pass));
   }
 
   //////////////////////////////////////////////

@@ -1,3 +1,6 @@
+#ifndef Eeprom_library
+#define Eeprom_library
+
 #include "EEPROM.h"
 
 int dir_ssid = 0;
@@ -49,3 +52,5 @@ String eeprom_read(int addr)
   }
   return strlectura;
 }
+
+#endif
