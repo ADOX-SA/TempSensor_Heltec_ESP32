@@ -53,19 +53,20 @@ public:
     /** Funciones para inicializacion de punteros: */
     bool set_wifi(char *, char *);
     bool set_wifi(char *,int, char *,int);
-    bool set_datos_set_time(char *);
+    bool set_topic_dir(int = 200); /** Default 200*/
+    bool set_datos_set_time(String*,int);
 
     /* Punteros a variables de configuracion: */
     char *p_ssid = NULL;
     char *p_pass = NULL;
-    char *p_datos_set_time = NULL;
     char *p_update_ver_name = NULL;
+    String *p_datos_set_time = NULL;
 
     /* Direcciones para grabar en EEPROM */
     int dir_ssid = -1;
     int dir_pass = -1;
     int dir_datos_set_time = -1;
-    int dir_topic = 200;
+    int dir_topic = -1;
     int dir_update_ver_name = -1;
 };
 

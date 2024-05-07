@@ -87,7 +87,7 @@ boolean mqtt_wifi::reconnect()
 {
     if (mqttClient.connect(client_name.c_str(), user.c_str(), pass.c_str(), (topic + "/status").c_str(), 0, 1, (client_name + " desconectado").c_str()))
     {
-        Serial.println("mqtt connected OK");
+        Serial.println("\nmqtt connected OK");
         mqttClient.publish((topic + "/status").c_str(), (client_name + " conectado").c_str(), 1);
         mqttClient.subscribe((topic).c_str());
     }
@@ -110,6 +110,29 @@ bool mqtt_wifi::set_wifi(char *_ssid, char *_pass)
     {
         p_ssid = _ssid;
         p_pass = _pass;
+        ret = true;
+    }
+    return ret;
+}
+
+bool mqtt_wifi::set_datos_set_time(String *_datos_set_time, int _addr)
+{
+    bool ret = false;
+    if (_datos_set_time != NULL)
+    {
+        dir_datos_set_time=_addr;
+        p_datos_set_time = _datos_set_time;
+        ret = true;
+    }
+    return ret;
+}
+
+bool mqtt_wifi::set_topic_dir(int _dir)
+{
+    bool ret = false;
+    if (_dir < 0)
+    {
+        dir_topic = _dir;
         ret = true;
     }
     return ret;
@@ -193,7 +216,8 @@ void mqtt_wifi::commands(String s_received)
         {
             if (p_datos_set_time != NULL)
             {
-                strcpy(p_datos_set_time, s.c_str());
+                //strcpy(p_datos_set_time, s.c_str());
+                *p_datos_set_time=s;
                 // grabar(dir_datos_set, datos_set);
                 _eeprom_write(dir_datos_set_time, s);
                 send(("actualizado. Intervalo: " + s).c_str());

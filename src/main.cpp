@@ -37,6 +37,8 @@ void setup()
   ESP32_eeprom_begin();
   eeprom_read(dir_ssid).toCharArray(ssid, 50);
   eeprom_read(dir_pass).toCharArray(pass, 50);
+  datos_set = eeprom_read(dir_datos_set);
+  Serial.print("\nDatos_set: " + datos_set);
 
   ESP32_setup_wifi();
   ESP32_modoconf();
@@ -49,6 +51,8 @@ void setup()
   // mqtt:
   mq.begin();
   mq.set_wifi(ssid, dir_ssid, pass, dir_pass);
+  mq.set_datos_set_time(&datos_set, dir_datos_set);
+  mq.set_topic_dir(dir_mqtt_topic); // Enviar direccion para no pisar con otros datos.
   // mq.set_wifi(ssid,pass);
 
   MLX90614_begin();
