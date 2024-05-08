@@ -16,7 +16,7 @@
 
 void mqtt_wifi::callback(char *topic, byte *payload, int length)
 {
-    Serial.print("\nMensaje recibido [");
+    MQTT_DEBUG("\nMensaje recibido [");
     char payload_string[length + 1];
 
     memcpy(payload_string, payload, length);
@@ -29,8 +29,8 @@ void mqtt_wifi::callback(char *topic, byte *payload, int length)
     {
         resultS = resultS + (char)payload[i];
     }
-    Serial.print(resultS);
-    Serial.print("]");
+    MQTT_DEBUG(resultS);
+    MQTT_DEBUG("]");
 
     send(resultS);
     commands(resultS);
@@ -39,15 +39,15 @@ void mqtt_wifi::callback(char *topic, byte *payload, int length)
 void mqtt_wifi::config_topic()
 {
     topic_name = _eeprom_read(dir_topic);
-    Serial.print("\n----------Lei: " + topic_name);
+    MQTT_DEBUG("\n----------Lei: " + topic_name);
     if (topic_name == "")
     {
         topic_name = String(((ESP.getEfuseMac()) >> 32), HEX);
     }
     client_name = topic_prefix + String("_") + topic_name;
     topic = topic_prefix + String("/") + topic_name;
-    Serial.print("\n[Topic]: " + topic);
-    Serial.print("\n[Client]: " + client_name);
+    MQTT_DEBUG("\n[Topic]: " + topic);
+    MQTT_DEBUG("\n[Client]: " + client_name);
 }
 
 mqtt_wifi::mqtt_wifi() : mqttClient(esp8266Client)
@@ -69,17 +69,17 @@ void mqtt_wifi::begin(String _user, String _pass)
     config_topic();
     reconnect();
 
-    Serial.println("MQTT: ");
-    Serial.println("client: " + client_name);
-    Serial.println("Suscribe: " + topic);
-    Serial.println("Publish: " + topic + "/data");
-    Serial.println("Status: " + topic + "/status");
+    MQTT_DEBUG("MQTT: ");
+    MQTT_DEBUG("client: " + client_name);
+    MQTT_DEBUG("Suscribe: " + topic);
+    MQTT_DEBUG("Publish: " + topic + "/data");
+    MQTT_DEBUG("Status: " + topic + "/status");
 }
 
 void mqtt_wifi::send(String _data)
 {
     bool res = mqttClient.publish((topic + "/data").c_str(), _data.c_str());
-    Serial.print("\nsend: " + topic + "/data");
+    MQTT_DEBUG("\nsend: " + topic + "/data");
     // DEBUG("result: " + String(res))
 }
 
@@ -87,13 +87,13 @@ boolean mqtt_wifi::reconnect()
 {
     if (mqttClient.connect(client_name.c_str(), user.c_str(), pass.c_str(), (topic + "/status").c_str(), 0, 1, (client_name + " desconectado").c_str()))
     {
-        Serial.println("\nmqtt connected OK");
+        MQTT_DEBUG("\nmqtt connected OK");
         mqttClient.publish((topic + "/status").c_str(), (client_name + " conectado").c_str(), 1);
         mqttClient.subscribe((topic).c_str());
     }
     else
     {
-        Serial.println(mqttClient.state());
+        MQTT_DEBUG(mqttClient.state());
     }
     return mqttClient.connected();
 }
@@ -149,7 +149,7 @@ bool mqtt_wifi::set_wifi(char *_ssid, int _addr_ssid, char *_pass, int _addr_pas
     }
     else
     {
-        Serial.print("\n[MQTT]: ssid/pass error");
+        MQTT_DEBUG("\n[MQTT]: ssid/pass error");
         ret = false;
     }
     if ((_addr_ssid != -1) && (_addr_pass != -1))
@@ -160,7 +160,7 @@ bool mqtt_wifi::set_wifi(char *_ssid, int _addr_ssid, char *_pass, int _addr_pas
     }
     else
     {
-        Serial.print("\n[MQTT]: dir_ssid/dir_pass error");
+        MQTT_DEBUG("\n[MQTT]: dir_ssid/dir_pass error");
         ret = false;
     }
 
@@ -174,14 +174,14 @@ void mqtt_wifi::commands(String s_received)
     {
 
         String s = s_received.substring(8, s_received.indexOf('>'));
-        Serial.print("\nActualizando: " + s);
+        MQTT_DEBUG("\nActualizando: " + s);
 
         int index_1 = s.indexOf("ver");
         int index_2 = s.indexOf(".bin");
         String aux_version = s.substring(index_1 + 3, index_2);
 
-        Serial.println("\nindex_1: " + String(index_1) + ", index_2: " + String(index_2));
-        Serial.println("aux_version:" + aux_version);
+        MQTT_DEBUG("\nindex_1: " + String(index_1) + ", index_2: " + String(index_2));
+        MQTT_DEBUG("aux_version:" + aux_version);
 
         /*
         if (aux_version != firmVer)
@@ -199,7 +199,7 @@ void mqtt_wifi::commands(String s_received)
     {
         delay(300);
         s_received = "";
-        Serial.print("\nReseteando");
+        MQTT_DEBUG("\nReseteando");
         ESP.restart(); //* Usar RESTART!
     }
     else if (s_received.indexOf("<recirculate>") != -1)
@@ -225,7 +225,7 @@ void mqtt_wifi::commands(String s_received)
             else
             {
                 send(("no actualizado [Err: unallocated pointer]" + s).c_str());
-                Serial.print("\np_datos_set_time UNSET");
+                MQTT_DEBUG("\np_datos_set_time UNSET");
             }
         }
         else
@@ -242,7 +242,7 @@ void mqtt_wifi::commands(String s_received)
         // grabar(dir_mqtt_topic_name, s);
         topic_name = s;
         _eeprom_write(dir_topic, s);
-        Serial.print("\nNew topic:\"" + s + "\"");
+        MQTT_DEBUG("\nNew topic:\"" + s + "\"");
 
         config_topic();
 
@@ -281,7 +281,7 @@ void mqtt_wifi::commands(String s_received)
         /*grabar(0, s);
         delay(30);
         leer(0).toCharArray(ssid, 50);*/
-        Serial.print("\nNew ssid:\"" + String(s) + "\"");
+        MQTT_DEBUG("\nNew ssid:\"" + String(s) + "\"");
     }
     else if (s_received.indexOf("<pass:") != -1)
     {
@@ -291,14 +291,14 @@ void mqtt_wifi::commands(String s_received)
 
         strcpy(p_pass, s.c_str());
         _eeprom_write(dir_pass, s);
-        Serial.print("\nNew pass:\"" + String(s) + "\"");
+        MQTT_DEBUG("\nNew pass:\"" + String(s) + "\"");
 
         // Guardo el valor recibido:
         /*grabar(50, s);
         delay(30);
         leer(50).toCharArray(pass, 50);
         // Muestro:
-        Serial.print("\nNew pass:\"" + String(pass) + "\"");
+        MQTT_DEBUG("\nNew pass:\"" + String(pass) + "\"");
         setup_wifi();
         if (WiFi.status() == WL_CONNECTED)
         {
@@ -329,7 +329,7 @@ void mqtt_wifi::_eeprom_begin()
     // EEPROM.begin(512);
     //  eeprom_read(dir_ssid).toCharArray(ssid, 50);
     //  eeprom_read(dir_pass).toCharArray(pass, 50);
-    //  Serial.print("EEPROM_begin: "+eeprom_read(dir_ssid)+", "+eeprom_read(dir_pass));
+    //  MQTT_DEBUG("EEPROM_begin: "+eeprom_read(dir_ssid)+", "+eeprom_read(dir_pass));
 }
 
 //----------------Función para grabar en la EEPROM-------------------
@@ -352,7 +352,7 @@ void mqtt_wifi::_eeprom_write(int addr, String a)
     }
     else
     {
-        Serial.print("\n[EEPROM]: wrong address");
+        MQTT_DEBUG("\n[EEPROM]: wrong address");
     }
 }
 

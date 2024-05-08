@@ -18,6 +18,12 @@
 
 #include "MqttData.h"
 
+#ifdef serial_debug
+#define MQTT_DEBUG(x) Serial.println(x);
+#else
+#define MQTT_DEBUG(x)
+#endif
+
 class mqtt_wifi
 {
 public:
@@ -61,6 +67,7 @@ public:
     char *p_pass = NULL;
     char *p_update_ver_name = NULL;
     String *p_datos_set_time = NULL;
+    bool *p_update_flag = NULL;
 
     /* Direcciones para grabar en EEPROM */
     int dir_ssid = -1;

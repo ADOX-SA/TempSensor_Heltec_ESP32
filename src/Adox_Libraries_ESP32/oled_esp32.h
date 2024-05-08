@@ -26,30 +26,6 @@ void oled_esp32_begin()
     for (;;)
       ; // Don't proceed, loop forever
   }
-  /*
-    display.clearDisplay();
-    display.display();
-
-    display.setCursor(0, 55); // Start at top-left corner
-
-    display.setTextSize(1); // Draw 2X-scale text
-    display.setTextColor(SSD1306_WHITE);
-    display.println(firmVer);
-
-    display.setCursor(15, 0); // Start at top-left corner
-
-    display.setTextSize(4); // Draw 2X-scale text
-    display.setTextColor(SSD1306_WHITE);
-    display.println(F("ADOX"));
-
-    display.setCursor(0, 35); // Start at top-left corner
-
-    display.setTextSize(2); // Draw 2X-scale text
-    display.setTextColor(SSD1306_WHITE);
-    display.println(oled_modo);
-
-    display.display();
-    */
 }
 
 void oled_receptor(String data_received)
@@ -226,4 +202,35 @@ void oled_battery()
   display.print(" %");
 
   display.display();
-  }
+}
+
+void oled_wifi()
+{
+  display.clearDisplay();
+  display.display();
+  //-
+  display.drawRect(0, 0, 128, 64, SSD1306_WHITE);
+  display.setTextSize(1);
+  //--------------------
+  display.setCursor(8, 6); // Start at top-left corner
+  display.print(F("SensorID: "));
+  display.print(SensorID);
+  //-----------------------
+  display.setCursor(8, 21); // Start at top-left corner
+  display.print(F("IP:"));
+  display.print(WiFi.localIP().toString());
+  //--------------------------
+  display.setCursor(8, 36); // Start at top-left corner
+  display.print(F("SSID: "));
+  display.print(WiFi.SSID());
+
+  //display.startscrollleft(6, 7);
+  String status_string = "Conectado";
+  int pos_med = 0;
+  pos_med = (((SCREEN_WIDTH - status_string.length() * 6)) / 2);
+
+  display.setCursor(pos_med, 51); // Start at top-left corner
+  display.println(status_string);
+
+  display.display();
+}

@@ -77,13 +77,31 @@ void loop()
   {
     battery_tic = 4000;
     battery_read();
-    oled_battery();
+    // oled_battery();
   }
 
   if (!oled_efect_1_tic)
   {
-    oled_efect_1_tic = 10000;
-    oled_effect_1();
+    static int index = 1;
+    oled_efect_1_tic = 5000;
+    switch (index)
+    {
+    case 1:
+      oled_effect_1();
+      break;
+    case 2:
+      oled_wifi();
+      break;
+    case 3:
+      oled_battery();
+      break;
+
+    default:
+      index = 0;
+      break;
+    }
+    index++;
+
     Serial.print("\nCONEXION: " + String(ssid) + ", " + String(pass));
   }
 
