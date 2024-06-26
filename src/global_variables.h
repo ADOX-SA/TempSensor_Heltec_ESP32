@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-String firmVer = "1.0";
+String firmVer = "1.1";
 
 /* Añade tu SSID & Clave para acceder a tu Wifi */
 char ssid[50];

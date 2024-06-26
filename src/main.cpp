@@ -1,5 +1,4 @@
 #include <Arduino.h>
-
 #include "global_variables.h"
 
 // --- Redondear una float o una double
@@ -19,6 +18,7 @@ float redondear(float valor, int decimales)
 #include "Adox_Libraries_ESP32/WiFi/WiFi_functions.h"
 #include "Adox_Libraries_ESP32/oled_esp32.h"
 #include "Adox_Libraries_ESP32/Serial_functions.h"
+#include "Adox_Libraries_ESP32/Bluetooh/Bluetooth_functions.h"
 
 //-----> MQTT
 #include "Adox_Libraries_ESP32/mqtt/MqttLibrary.h"
