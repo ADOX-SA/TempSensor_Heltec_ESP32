@@ -59,10 +59,14 @@ void setup()
   Timer_begin();
   battery_config();
   pinMode(pin_led, OUTPUT);
+
+  BluetoothBegin(); // Iniciar bluetooth.
 }
 
 void loop()
 {
+  BluetoothLoop(); // Bluetooth loop
+
   mq.loop();          // Peticiones de mqtt
   Serial_read_wifi(); // Para grabar ssid y pass por puerto serie.
   ESP32_loop();       // Recibe peticiones.
@@ -102,7 +106,7 @@ void loop()
     }
     index++;
 
-    Serial.print("\nCONEXION: " + String(ssid) + ", " + String(pass));
+   //Serial.print("\nCONEXION: " + String(ssid) + ", " + String(pass));
   }
 
   //////////////////////////////////////////////
