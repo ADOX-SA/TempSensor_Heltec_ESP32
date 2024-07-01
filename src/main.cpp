@@ -55,12 +55,14 @@ void setup()
   mq.set_topic_dir(dir_mqtt_topic); // Enviar direccion para no pisar con otros datos.
   // mq.set_wifi(ssid,pass);
 
-  MLX90614_begin();
+  //MLX90614_begin();
   Timer_begin();
   battery_config();
   pinMode(pin_led, OUTPUT);
 
+  Serial.println("Arra1sco");
   BluetoothBegin(); // Iniciar bluetooth.
+  Serial.println("Arra2");
 }
 
 void loop()
@@ -79,7 +81,8 @@ void loop()
 
   if (!battery_tic)
   {
-    battery_tic = 4000;
+    Serial.println("eStOy ViVo");
+    battery_tic = 10000;
     battery_read();
     // oled_battery();
   }
