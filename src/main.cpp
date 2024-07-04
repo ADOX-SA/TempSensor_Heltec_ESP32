@@ -19,6 +19,7 @@ float redondear(float valor, int decimales)
 #include "Adox_Libraries_ESP32/oled_esp32.h"
 #include "Adox_Libraries_ESP32/Serial_functions.h"
 #include "Adox_Libraries_ESP32/Bluetooh/Bluetooth_functions.h"
+#include "Adox_Libraries_ESP32/gpio_functions.h"
 
 //-----> MQTT
 #include "Adox_Libraries_ESP32/mqtt/MqttLibrary.h"
@@ -55,11 +56,12 @@ void setup()
   mq.set_topic_dir(dir_mqtt_topic); // Enviar direccion para no pisar con otros datos.
   // mq.set_wifi(ssid,pass);
 
-  //MLX90614_begin();
+  // MLX90614_begin();
   Timer_begin();
   battery_config();
   pinMode(pin_led, OUTPUT);
 
+  GpioPinsBegin();
   Serial.println("Arra1sco");
   BluetoothBegin(); // Iniciar bluetooth.
   Serial.println("Arra2");
@@ -67,11 +69,52 @@ void setup()
 
 void loop()
 {
-  BluetoothLoop(); // Bluetooth loop
-
+  /**************** LOOPING FUNCTIONS ****************/
+  BluetoothLoop();    // Bluetooth loop
   mq.loop();          // Peticiones de mqtt
   Serial_read_wifi(); // Para grabar ssid y pass por puerto serie.
   ESP32_loop();       // Recibe peticiones.
+  CheckButtons();
+  /***************************************************/
+
+  if (ble_flag_send_msg)
+  {
+    ble_flag_send_msg = false;
+    static int x = 0;
+    x++;
+    String data = "Envio: ";
+    data += String(x);
+    BluetoothSend(data);
+    //---------------------
+    display.clearDisplay();
+    display.display();
+    display.drawRect(0, 0, 128, 64, SSD1306_WHITE);
+    display.setTextSize(1);
+    display.setCursor(8, 6); // Start at top-left corner
+    display.print("BLE " + ble_mode + " send:");
+    display.setCursor(8, 21); // Start at top-left corner
+    display.print(data);
+    display.display();
+    //---------------------
+    oled_efect_1_tic = 2500; // reset
+  }
+
+  if (ble_flag_new_data)
+  {
+    ble_flag_new_data = false;
+    //---------------------
+    display.clearDisplay();
+    display.display();
+    display.drawRect(0, 0, 128, 64, SSD1306_WHITE);
+    display.setTextSize(1);
+    display.setCursor(8, 6); // Start at top-left corner
+    display.print("BLE " + ble_mode + " msg:");
+    display.setCursor(8, 21); // Start at top-left corner
+    display.print(ble_msg);
+    display.display();
+    //---------------------
+    oled_efect_1_tic = 2500; // reset
+  }
 
   if (!MLX90614_tic)
   {
@@ -109,7 +152,7 @@ void loop()
     }
     index++;
 
-   //Serial.print("\nCONEXION: " + String(ssid) + ", " + String(pass));
+    // Serial.print("\nCONEXION: " + String(ssid) + ", " + String(pass));
   }
 
   //////////////////////////////////////////////

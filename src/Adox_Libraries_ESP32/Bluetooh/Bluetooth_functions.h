@@ -1,5 +1,4 @@
 #include <Arduino.h>
-String ble_mode = "Receptor";
 //------------------------------------------------------
 //------------------------------------------------------
 //------------------------------------------------------
@@ -9,18 +8,19 @@ String ble_mode = "Receptor";
 #include <BLEUtils.h>
 #include <BLE2902.h>
 
-//-------------------- Variables usadas por cliente y servidor:
-#define BLE_SERVER_NAME "MatiasRey"
-#define SERVICE_UUID "6E400001-B5A3-F393-E0A9-E50E24DCCA9E" // UART service UUID
-#define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
-#define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
+#include "Bluetooth_data.h"
 
-//-------------------------------------------
-//------------- SERVER CODE -----------------
-//-------------------------------------------
-//#define SERVER_CODE
+/**
+ * BLE global variables.
+ */
+bool ble_flag_new_data = false;
+bool ble_flag_send_msg = false;
+String ble_msg = "";
+
 #ifdef SERVER_CODE
 //------ Codigo del servidor:
+
+String ble_mode = "server";
 
 BLEServer *pServer = NULL;
 BLECharacteristic *pTxCharacteristic;
@@ -118,14 +118,32 @@ void BluetoothLoop()
         // do stuff here on connecting
         oldDeviceConnected = deviceConnected;
     }
+    /*
+        static int timer1 = millis();
+        int timer2 = millis();
+        if ((timer2 - timer1) > 5000)
+        {
+            timer1 = timer2;
 
-    static int timer1 = millis();
-    int timer2 = millis();
-    if ((timer2 - timer1) > 5000)
+            String mensaje = "Lo estas leyendo?";
+            // Convertir el mensaje a un arreglo de bytes (uint8_t)
+            uint8_t msg[mensaje.length() + 1]; // +1 para el carácter nulo
+            mensaje.getBytes(msg, mensaje.length() + 1);
+
+            // Configurar el valor de la característica TX con el mensaje
+            pTxCharacteristic->setValue(msg, mensaje.length() + 1);
+
+            // Enviar la notificación a los dispositivos conectados
+            pTxCharacteristic->notify();
+        }
+        */
+}
+
+void BluetoothSend(String mensaje)
+{
+    if (mensaje != "")
     {
-        timer1 = timer2;
-        /* code */
-        String mensaje = "Lo estas leyendo?";
+
         // Convertir el mensaje a un arreglo de bytes (uint8_t)
         uint8_t msg[mensaje.length() + 1]; // +1 para el carácter nulo
         mensaje.getBytes(msg, mensaje.length() + 1);
@@ -143,6 +161,8 @@ void BluetoothLoop()
 //------------- CLIENT CODE -----------------
 //-------------------------------------------
 //---------Codigo del cliente:
+
+String ble_mode = "client";
 
 static BLEUUID ServiceUUID(SERVICE_UUID);
 static BLEUUID RXCharacteristicUUID(CHARACTERISTIC_UUID_TX);
@@ -172,9 +192,10 @@ static void RXNotifyCallback(BLERemoteCharacteristic *pBLERemoteCharacteristic,
     // store temperature value
     RX_bool = true;
 
-     // Convertir a String
+    // Convertir a String
     String dataStr;
-    for (size_t i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++)
+    {
         dataStr += (char)pData[i];
     }
     RX_str = dataStr;
@@ -182,6 +203,9 @@ static void RXNotifyCallback(BLERemoteCharacteristic *pBLERemoteCharacteristic,
     // Usar dataStr como necesites
     Serial.print("Datos recibidos: ");
     Serial.println(dataStr);
+    //-----------------------------
+    ble_msg = dataStr;
+    ble_flag_new_data = true;
 }
 
 // Connect to the BLE Server that has the name, Service, and Characteristics
@@ -232,8 +256,6 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
     }
 };
 
-
-
 void BluetoothBegin()
 {
     // Init BLE device
@@ -250,14 +272,14 @@ void BluetoothBegin()
 
 void BluetoothLoop()
 {
-    
+
     if (doConnect == true)
     {
         if (connectToServer(*pServerAddress))
         {
             Serial.println("We are now connected to the BLE Server.");
             // Activate the Notify property of each Characteristic
-            //RXCharacteristic->getDescriptor(BLEUUID((uint16_t)0x2902))->writeValue((uint8_t *)notificationOn, 2, true);
+            // RXCharacteristic->getDescriptor(BLEUUID((uint16_t)0x2902))->writeValue((uint8_t *)notificationOn, 2, true);
             connected = true;
         }
         else
@@ -273,6 +295,27 @@ void BluetoothLoop()
 
         Serial.print("\n[RECEPTOR]: ");
         Serial.println(RX_str);
+        //----------------------------
     }
+}
+
+void BluetoothSend(String msg)
+{
+    /**
+     *
+     * DEFINIR CARACTERISTICA PARA ENVIAR MENSAJES!
+     *
+     */
+    /* code */
+    String mensaje = "Lo estas leyendo?";
+    // Convertir el mensaje a un arreglo de bytes (uint8_t)
+    // uint8_t msg[mensaje.length() + 1]; // +1 para el carácter nulo
+    // mensaje.getBytes(msg, mensaje.length() + 1);
+
+    // Configurar el valor de la característica TX con el mensaje
+    // pTxCharacteristic->setValue(msg, mensaje.length() + 1);
+
+    // Enviar la notificación a los dispositivos conectados
+    // pTxCharacteristic->notify();
 }
 #endif
