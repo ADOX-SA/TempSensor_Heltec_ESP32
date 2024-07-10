@@ -77,6 +77,40 @@ void loop()
   CheckButtons();
   /***************************************************/
 
+  if (!ble_reconnect_tic)
+  {
+
+    if (ble_client_first_connection) // Es la primera conexion
+    {
+      bool status = BLECheckConnection();
+      if (!status)
+      {
+        // No esta conectado
+        BLEDevice::getScan()->start(15, false); // Reconectamos
+                                                //---------------------
+        display.clearDisplay();
+        display.display();
+        display.drawRect(0, 0, 128, 64, SSD1306_WHITE);
+        display.setTextSize(1);
+        display.setCursor(8, 15); // Start at top-left corner
+        display.print("Bluetooth");
+        display.setCursor(8, 30); // Start at top-left corner
+        display.print("disconnected");
+        display.display();
+        //---------------------
+      }
+    }
+    else if (!ble_client_first_connection) // No se conecto por primera vez
+    {
+      BLEDevice::getScan()->start(15, false); // Reconectamos
+    }
+
+    //---------------------
+    //---------------------
+    oled_efect_1_tic = 3500; // reset
+    ble_reconnect_tic = 4500;
+  }
+
   if (ble_flag_send_msg)
   {
     ble_flag_send_msg = false;
@@ -125,7 +159,7 @@ void loop()
   if (!battery_tic)
   {
     Serial.println("eStOy ViVo");
-    battery_tic = 10000;
+    battery_tic = 50000;
     battery_read();
     // oled_battery();
   }

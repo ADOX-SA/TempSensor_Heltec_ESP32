@@ -98,7 +98,7 @@ void oled_init()
 
   delay(400);
   time1 = 75;
-  aux = "Termometro";
+  aux = "RFID";
   tam = aux.length();
   display.setCursor(0, 26); // Start at top-left corner
   display.setTextSize(2);
@@ -117,7 +117,7 @@ void oled_init()
     delay(time1);
   }
 
-  aux = "Infrarrojo";
+  aux = "READER";
   tam = aux.length();
   display.setCursor(0, 44); // Start at top-left corner
   display.setTextSize(2);

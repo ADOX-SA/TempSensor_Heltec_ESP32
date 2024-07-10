@@ -11,4 +11,4 @@
  * Si NO se comenta la siguiente linea funciona como server.
  * 
  */
-#define SERVER_CODE
+//#define SERVER_CODE

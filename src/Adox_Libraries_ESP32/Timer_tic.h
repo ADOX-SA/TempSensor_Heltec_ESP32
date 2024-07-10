@@ -7,6 +7,7 @@ long MLX90614_tic = 0;
 long send_UDP_tic = 0;
 long oled_efect_1_tic = 0;
 long battery_tic = 0;
+long ble_reconnect_tic = 0;
 
 void Timer_1ms()
 {
@@ -18,6 +19,8 @@ void Timer_1ms()
         oled_efect_1_tic--;
     if (battery_tic > 0)
         battery_tic--;
+    if (ble_reconnect_tic > 0)
+        ble_reconnect_tic--;
 }
 
 void Timer_begin()

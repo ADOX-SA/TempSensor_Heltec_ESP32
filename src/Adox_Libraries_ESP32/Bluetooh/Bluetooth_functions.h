@@ -15,6 +15,11 @@
  */
 bool ble_flag_new_data = false;
 bool ble_flag_send_msg = false;
+//---> Client
+bool ble_client_connection = false;
+bool ble_client_first_connection = false;
+bool ble_client_status = false;
+
 String ble_msg = "";
 
 #ifdef SERVER_CODE
@@ -169,6 +174,7 @@ static BLEUUID RXCharacteristicUUID(CHARACTERISTIC_UUID_TX);
 
 // Address of the peripheral device. Address will be found during scanning...
 static BLEAddress *pServerAddress;
+BLEClient *pClient; // Definir el cliente BLE globalmente
 
 // Characteristicd that we want to read
 static BLERemoteCharacteristic *RXCharacteristic;
@@ -177,8 +183,7 @@ static BLERemoteCharacteristic *RXCharacteristic;
 const uint8_t notificationOn[] = {0x1, 0x0};
 const uint8_t notificationOff[] = {0x0, 0x0};
 
-static boolean doConnect = false;
-static boolean connected = false;
+static boolean client_doConnect = false;
 
 String RX_str;
 boolean RX_bool = false;
@@ -211,10 +216,13 @@ static void RXNotifyCallback(BLERemoteCharacteristic *pBLERemoteCharacteristic,
 // Connect to the BLE Server that has the name, Service, and Characteristics
 bool connectToServer(BLEAddress pAddress)
 {
-    BLEClient *pClient = BLEDevice::createClient();
+    pClient = BLEDevice::createClient();
 
-    // Connect to the remove BLE Server.
-    pClient->connect(pAddress);
+    // Connect to the remote BLE Server.
+    if (!pClient->connect(pAddress))
+    {
+        return false;
+    }
     Serial.println(" - Connected to server");
 
     // Obtain a reference to the service we are after in the remote BLE server.
@@ -223,7 +231,7 @@ bool connectToServer(BLEAddress pAddress)
     {
         Serial.print("Failed to find our service UUID: ");
         Serial.println(ServiceUUID.toString().c_str());
-        return (false);
+        return false;
     }
 
     // Obtain a reference to the characteristics in the service of the remote BLE server.
@@ -250,8 +258,12 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
         {                                                                   // Check if the name of the advertiser matches
             advertisedDevice.getScan()->stop();                             // Scan can be stopped, we found what we are looking for
             pServerAddress = new BLEAddress(advertisedDevice.getAddress()); // Address of advertiser is the one we need
-            doConnect = true;                                               // Set indicator, stating that we are ready to connect
+            client_doConnect = true;                                        // Set indicator, stating that we are ready to connect
             Serial.println("Device found. Connecting!");
+        }
+        else
+        {
+            Serial.println("Device not found!");
         }
     }
 };
@@ -267,35 +279,48 @@ void BluetoothBegin()
     BLEScan *pBLEScan = BLEDevice::getScan();
     pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
     pBLEScan->setActiveScan(true);
-    pBLEScan->start(30);
+    pBLEScan->start(15);
+}
+
+bool BLECheckConnection()
+{
+    //Serial.println("[BLE Client] checkconnection");
+    if (pClient != nullptr)
+    {
+        bool status = pClient->isConnected();
+        // Serial.println("[BLE Client] status: " + String(status));
+        if (status)
+        {
+            Serial.println("[BLE Client] connected! ");
+            return true;
+        }
+    }
+    return false;
 }
 
 void BluetoothLoop()
 {
-
-    if (doConnect == true)
+    if (client_doConnect)
     {
         if (connectToServer(*pServerAddress))
         {
             Serial.println("We are now connected to the BLE Server.");
-            // Activate the Notify property of each Characteristic
-            // RXCharacteristic->getDescriptor(BLEUUID((uint16_t)0x2902))->writeValue((uint8_t *)notificationOn, 2, true);
-            connected = true;
+            ble_client_first_connection = true;
         }
         else
         {
-            Serial.println("We have failed to connect to the server; Restart your device to scan for nearby BLE server again.");
+            Serial.println("Failed to connect to the server; retrying.");
         }
-        doConnect = false;
+        client_doConnect = false;
     }
-    // if new temperature readings are available, print in the OLED
+
+
+    // Si hay datos nuevos disponibles, procesarlos
     if (RX_bool)
     {
         RX_bool = false;
-
         Serial.print("\n[RECEPTOR]: ");
         Serial.println(RX_str);
-        //----------------------------
     }
 }
 
