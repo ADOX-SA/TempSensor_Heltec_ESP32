@@ -185,8 +185,8 @@ const uint8_t notificationOff[] = {0x0, 0x0};
 
 static boolean client_doConnect = false;
 
-String RX_str;
-boolean RX_bool = false;
+String client_msg_str;
+boolean client_msg_received = false;
 
 //****************************************************************************************** */
 
@@ -195,7 +195,7 @@ static void RXNotifyCallback(BLERemoteCharacteristic *pBLERemoteCharacteristic,
                              uint8_t *pData, size_t length, bool isNotify)
 {
     // store temperature value
-    RX_bool = true;
+    client_msg_received = true;
 
     // Convertir a String
     String dataStr;
@@ -203,7 +203,7 @@ static void RXNotifyCallback(BLERemoteCharacteristic *pBLERemoteCharacteristic,
     {
         dataStr += (char)pData[i];
     }
-    RX_str = dataStr;
+    client_msg_str = dataStr;
 
     // Usar dataStr como necesites
     Serial.print("Datos recibidos: ");
@@ -316,11 +316,11 @@ void BluetoothLoop()
 
 
     // Si hay datos nuevos disponibles, procesarlos
-    if (RX_bool)
+    if (client_msg_received)
     {
-        RX_bool = false;
+        client_msg_received = false;
         Serial.print("\n[RECEPTOR]: ");
-        Serial.println(RX_str);
+        Serial.println(client_msg_str);
     }
 }
 
