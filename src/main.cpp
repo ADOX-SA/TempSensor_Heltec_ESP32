@@ -20,6 +20,7 @@ float redondear(float valor, int decimales)
 #include "Adox_Libraries_ESP32/Serial_functions.h"
 #include "Adox_Libraries_ESP32/Bluetooh/Bluetooth_functions.h"
 #include "Adox_Libraries_ESP32/gpio_functions.h"
+#include "Adox_Libraries_ESP32/MFRC522_functions.h"
 
 //-----> MQTT
 #include "Adox_Libraries_ESP32/mqtt/MqttLibrary.h"
@@ -57,6 +58,7 @@ void setup()
   // mq.set_wifi(ssid,pass);
 
   // MLX90614_begin();
+  MFRC522_begin();
   Timer_begin();
   battery_config();
   pinMode(pin_led, OUTPUT);
@@ -75,6 +77,7 @@ void loop()
   Serial_read_wifi(); // Para grabar ssid y pass por puerto serie.
   ESP32_loop();       // Recibe peticiones.
   CheckButtons();
+  MFRC522_loop();
   /***************************************************/
 
   #ifndef SERVER_CODE
