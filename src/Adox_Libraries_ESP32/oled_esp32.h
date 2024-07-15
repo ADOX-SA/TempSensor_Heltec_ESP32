@@ -76,7 +76,7 @@ void oled_transmisor(String data_sent)
   display.display();
 }
 
-void oled_init()
+void oled_init(String device)
 {
 
   display.clearDisplay();
@@ -98,7 +98,7 @@ void oled_init()
 
   delay(400);
   time1 = 75;
-  aux = "RFID";
+  aux = "BLE";
   tam = aux.length();
   display.setCursor(0, 26); // Start at top-left corner
   display.setTextSize(2);
@@ -117,7 +117,7 @@ void oled_init()
     delay(time1);
   }
 
-  aux = "READER";
+  aux = device;
   tam = aux.length();
   display.setCursor(0, 44); // Start at top-left corner
   display.setTextSize(2);

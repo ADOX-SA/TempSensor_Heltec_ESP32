@@ -29,7 +29,7 @@ void setup()
 {
   Serial.begin(115200);
   oled_esp32_begin();
-  oled_init();
+  oled_init(ble_mode);
   // initialize SX1262 with default settings
   Serial.println("Iniciando... ");
 
@@ -77,6 +77,7 @@ void loop()
   CheckButtons();
   /***************************************************/
 
+  #ifndef SERVER_CODE
   if (!ble_reconnect_tic)
   {
 
@@ -110,6 +111,7 @@ void loop()
     oled_efect_1_tic = 3500; // reset
     ble_reconnect_tic = 4500;
   }
+  #endif
 
   if (ble_flag_send_msg)
   {
