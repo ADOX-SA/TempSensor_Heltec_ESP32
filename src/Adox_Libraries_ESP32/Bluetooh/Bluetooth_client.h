@@ -171,6 +171,9 @@ void BluetoothLoop()
         {
             Serial.println("We are now connected to the BLE Server.");
             ble_client_first_connection = true;
+            /* Si se enciende la placa y no se establece ninguna conexion BLE,
+            al ejecutar la funcion: BLECheckConnection() se genera error y
+            resetea la placa!!! */
         }
         else
         {

@@ -1,13 +1,6 @@
 #include <Arduino.h>
 #include "global_variables.h"
 
-// --- Redondear una float o una double
-float redondear(float valor, int decimales)
-{
-  double _potencia = pow(10, decimales);
-  return (roundf(valor * _potencia) / _potencia);
-};
-
 #include "Adox_Libraries_ESP32/UDP_functions.h"
 #include "Adox_Libraries_ESP32/Sensor_MLX90614.h"
 #include "Adox_Libraries_ESP32/I2C_scanner.h"
@@ -31,7 +24,6 @@ void setup()
   Serial.begin(115200);
   oled_esp32_begin();
   oled_init(ble_mode);
-  // initialize SX1262 with default settings
   Serial.println("Iniciando... ");
 
   Serial.println("CHIP ID: " + String((uint16_t)((ESP.getEfuseMac()) >> 32), HEX));
@@ -64,9 +56,9 @@ void setup()
   pinMode(pin_led, OUTPUT);
 
   GpioPinsBegin();
-  Serial.println("Arra1sco");
+  Serial.println("[BLE]: init in setup");
   BluetoothBegin(); // Iniciar bluetooth.
-  Serial.println("Arra2");
+  Serial.println("[BLE]: finish in setup");
 }
 
 void loop()
@@ -76,21 +68,25 @@ void loop()
   mq.loop();          // Peticiones de mqtt
   Serial_read_wifi(); // Para grabar ssid y pass por puerto serie.
   ESP32_loop();       // Recibe peticiones.
-  CheckButtons();
-  MFRC522_loop();
+  CheckButtons();     // Lectura de botones
+  MFRC522_loop();     // Lectura de tarjetas RFID.
   /***************************************************/
 
-  #ifndef SERVER_CODE
+#ifndef SERVER_CODE
   if (!ble_reconnect_tic)
   {
 
     if (ble_client_first_connection) // Es la primera conexion
     {
+    /* Si se enciende la placa y no se establece ninguna conexion BLE,
+    al ejecutar la funcion: BLECheckConnection() se genera error y
+    resetea la placa!!! */
+
       bool status = BLECheckConnection();
       if (!status)
       {
         // No esta conectado
-        BLEDevice::getScan()->start(15, false); // Reconectamos
+        BLEDevice::getScan()->start(10, false); // Reconectamos
                                                 //---------------------
         display.clearDisplay();
         display.display();
@@ -106,34 +102,52 @@ void loop()
     }
     else if (!ble_client_first_connection) // No se conecto por primera vez
     {
-      BLEDevice::getScan()->start(15, false); // Reconectamos
+      BLEDevice::getScan()->start(5, false); // Reconectamos
     }
 
     //---------------------
     //---------------------
     oled_efect_1_tic = 3500; // reset
-    ble_reconnect_tic = 4500;
+    ble_reconnect_tic = 30000;
   }
-  #endif
+#endif
 
-  if (ble_flag_send_msg)
+  if (flag_new_rfid)
   {
-    ble_flag_send_msg = false;
-    static int x = 0;
-    x++;
-    String data = "Envio: ";
-    data += String(x);
-    BluetoothSend(data);
+    flag_new_rfid = false;
+    ble_flag_send_msg = true;
     //---------------------
     display.clearDisplay();
     display.display();
     display.drawRect(0, 0, 128, 64, SSD1306_WHITE);
+    display.setTextSize(2);
+    display.setCursor(10, 10);
+    display.print("RFID ID:");
     display.setTextSize(1);
-    display.setCursor(8, 6); // Start at top-left corner
-    display.print("BLE " + ble_mode + " send:");
-    display.setCursor(8, 21); // Start at top-left corner
-    display.print(data);
+    int pos_med = 0;
+    pos_med = (((SCREEN_WIDTH - rfid_serial.length() * 6)) / 2);
+    display.setCursor(pos_med, 35);
+    display.println(rfid_serial);
     display.display();
+    //---------------------
+    oled_efect_1_tic = 2500; // reset
+  }
+
+  if (ble_flag_send_msg)
+  {
+    Serial.print("\n[BLE]: send");
+    ble_flag_send_msg = false;
+    BluetoothSend(rfid_serial);
+    //---------------------
+    //display.clearDisplay();
+    //display.display();
+    //display.drawRect(0, 0, 128, 64, SSD1306_WHITE);
+    //display.setTextSize(1);
+    //display.setCursor(8, 6); // Start at top-left corner
+    //display.print("BLE " + ble_mode + " send:");
+    //display.setCursor(8, 21); // Start at top-left corner
+    //display.print(data);
+    //display.display();
     //---------------------
     oled_efect_1_tic = 2500; // reset
   }
@@ -169,6 +183,7 @@ void loop()
     // oled_battery();
   }
 
+/*
   if (!oled_efect_1_tic)
   {
     static int index = 1;
@@ -190,9 +205,8 @@ void loop()
       break;
     }
     index++;
-
-    // Serial.print("\nCONEXION: " + String(ssid) + ", " + String(pass));
-  }
+}
+*/
 
   //////////////////////////////////////////////
   // if ((last_MLX90614_ambient_temp != MLX90614_ambient_temp) || (last_MLX90614_object_temp != MLX90614_object_temp))

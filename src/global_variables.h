@@ -23,3 +23,10 @@ int dir_vbat_max = 100;
 int dir_vbat_min = 150;
 int dir_mqtt_topic = 200;
 int dir_datos_set = 250;
+
+// --- Redondear una float o una double
+float redondear(float valor, int decimales)
+{
+  double _potencia = pow(10, decimales);
+  return (roundf(valor * _potencia) / _potencia);
+};
