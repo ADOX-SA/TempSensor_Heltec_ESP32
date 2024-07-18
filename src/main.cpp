@@ -93,46 +93,6 @@ void loop()
   MFRC522_loop();     // Lectura de tarjetas RFID.
   /***************************************************/
 
-#ifndef SERVER_CODE
-  if (!ble_reconnect_tic)
-  {
-
-    if (ble_client_first_connection) // Es la primera conexion
-    {
-      /* Si se enciende la placa y no se establece ninguna conexion BLE,
-      al ejecutar la funcion: BLECheckConnection() se genera error y
-      resetea la placa!!! */
-
-      bool status = BLECheckConnection();
-      if (!status)
-      {
-        // No esta conectado
-        BLEDevice::getScan()->start(10, false); // Reconectamos
-                                                //---------------------
-        display.clearDisplay();
-        display.display();
-        display.drawRect(0, 0, 128, 64, SSD1306_WHITE);
-        display.setTextSize(1);
-        display.setCursor(8, 15); // Start at top-left corner
-        display.print("Bluetooth");
-        display.setCursor(8, 30); // Start at top-left corner
-        display.print("disconnected");
-        display.display();
-        //---------------------
-      }
-    }
-    else if (!ble_client_first_connection) // No se conecto por primera vez
-    {
-      BLEDevice::getScan()->start(5, false); // Reconectamos
-    }
-
-    //---------------------
-    //---------------------
-    oled_efect_1_tic = 3500; // reset
-    ble_reconnect_tic = 30000;
-  }
-#endif
-
   if (flag_new_rfid)
   {
     flag_new_rfid = false;
@@ -204,30 +164,48 @@ void loop()
     // oled_battery();
   }
 
-  
-    if (!oled_efect_1_tic)
+  if (!oled_efect_1_tic)
+  {
+    static int index = 1;
+    oled_efect_1_tic = 5000;
+    switch (index)
     {
-      static int index = 1;
-      oled_efect_1_tic = 5000;
-      switch (index)
-      {
-      case 1:
-        oled_effect_1();
-        break;
-      case 2:
-        oled_wifi();
-        break;
-      case 3:
-        oled_battery();
-        break;
+    case 1:
+      oled_effect_1();
+      break;
+    case 2:
+      oled_wifi();
+      break;
+    case 3:
+      oled_battery();
+      break;
+    case 4:
+      display.clearDisplay();
+      display.display();
+      display.drawRect(0, 0, 128, 64, SSD1306_WHITE);
+      display.setTextSize(1);
+      display.setCursor(8, 15); // Start at top-left corner
+      display.print("Bluetooth");
+      display.setCursor(8, 30); // Start at top-left corner
 
-      default:
-        index = 0;
-        break;
+      if (!ble_client_connection)
+      {
+        display.print("disconnected");
       }
-      index++;
+      else
+      {
+        display.print("connected");
+      }
+      display.display();
+      //---------------------
+      break;
+
+    default:
+      index = 0;
+      break;
+    }
+    index++;
   }
-  
 
   //////////////////////////////////////////////
   // if ((last_MLX90614_ambient_temp != MLX90614_ambient_temp) || (last_MLX90614_object_temp != MLX90614_object_temp))

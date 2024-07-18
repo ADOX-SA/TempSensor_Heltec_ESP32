@@ -184,6 +184,38 @@ void BluetoothLoop()
         client_doConnect = false;
     }
 
+    static int time1 = millis();
+    int time2 = millis();
+    if ((time2 - time1) > 30000)
+    {
+        Serial.println("[BLE]: check connection");
+        time1 = time2;
+        if (ble_client_first_connection) // Es la primera conexion
+        {
+            /* Si se enciende la placa y no se establece ninguna conexion BLE,
+            al ejecutar la funcion: BLECheckConnection() se genera error y
+            resetea la placa!!! */
+
+            bool status = BLECheckConnection();
+            if (!status)
+            {
+                ble_client_connection = false;
+                // No esta conectado
+                BLEDevice::getScan()->start(10, false); // Reconectamos
+                                                        //---------------------
+            }
+            else
+            {
+                ble_client_connection = true;
+            }
+        }
+        else if (!ble_client_first_connection) // No se conecto por primera vez
+        {
+            ble_client_connection = false;
+            BLEDevice::getScan()->start(5, false); // Reconectamos
+        }
+    }
+
     // Si hay datos nuevos disponibles, procesarlos
     if (client_msg_received)
     {
