@@ -1,3 +1,11 @@
+/*****************************************************************************
+ *  \brief     File: main.cpp.                                                *
+ *  \details   This is the main program                                       *
+ *  \author    Matias Herrera                                                 *
+ *  \version   1.0                                                            *
+ *  \date      2024                                                           *
+ ******************************************************************************/
+
 #include <Arduino.h>
 #include "global_variables.h"
 
@@ -21,42 +29,55 @@ mqtt_wifi mq;
 
 void setup()
 {
+  //---->
   Serial.begin(115200);
-  oled_esp32_begin();
-  oled_init(ble_mode);
   Serial.println("Iniciando... ");
-
   Serial.println("CHIP ID: " + String((uint16_t)((ESP.getEfuseMac()) >> 32), HEX));
 
+  //----> Pantalla OLED
+  oled_esp32_begin();
+  oled_init(ble_mode);
+
+  //----> Memoria EEPROM
   ESP32_eeprom_begin();
   eeprom_read(dir_ssid).toCharArray(ssid, 50);
   eeprom_read(dir_pass).toCharArray(pass, 50);
   datos_set = eeprom_read(dir_datos_set);
-  Serial.print("\nDatos_set: " + datos_set);
+  // Serial.print("\nDatos_set: " + datos_set);
 
+  //----> WiFi
   ESP32_setup_wifi();
   ESP32_modoconf();
 
-  // ESP32_spiffs_begin();
-  // ESP32_spiffs_write();
-
+  //----> Escanear dispositivos I2C conectados
   // I2C_scanner();
 
-  // mqtt:
+  //----> MQTT
   mq.begin();
   mq.set_wifi(ssid, dir_ssid, pass, dir_pass);
   mq.set_datos_set_time(&datos_set, dir_datos_set);
-  mq.set_topic_dir(dir_mqtt_topic); // Enviar direccion para no pisar con otros datos.
-  // mq.set_wifi(ssid,pass);
+  mq.set_topic_dir(dir_mqtt_topic);
 
-  // MLX90614_begin();
+  //----> Sensor de temperatura optico.
+  MLX90614_begin();
+
+  //----> Lector RFID
   MFRC522_begin();
+
+  //----> Timer
   Timer_begin();
+
+  //----> Battery
   battery_config();
+
+  //----> LED pin configuration.
   pinMode(pin_led, OUTPUT);
 
+  //----> GPIO
   GpioPinsBegin();
+
   Serial.println("[BLE]: init in setup");
+  //----> Bluetooth
   BluetoothBegin(); // Iniciar bluetooth.
   Serial.println("[BLE]: finish in setup");
 }
@@ -78,9 +99,9 @@ void loop()
 
     if (ble_client_first_connection) // Es la primera conexion
     {
-    /* Si se enciende la placa y no se establece ninguna conexion BLE,
-    al ejecutar la funcion: BLECheckConnection() se genera error y
-    resetea la placa!!! */
+      /* Si se enciende la placa y no se establece ninguna conexion BLE,
+      al ejecutar la funcion: BLECheckConnection() se genera error y
+      resetea la placa!!! */
 
       bool status = BLECheckConnection();
       if (!status)
@@ -139,15 +160,15 @@ void loop()
     ble_flag_send_msg = false;
     BluetoothSend(rfid_serial);
     //---------------------
-    //display.clearDisplay();
-    //display.display();
-    //display.drawRect(0, 0, 128, 64, SSD1306_WHITE);
-    //display.setTextSize(1);
-    //display.setCursor(8, 6); // Start at top-left corner
-    //display.print("BLE " + ble_mode + " send:");
-    //display.setCursor(8, 21); // Start at top-left corner
-    //display.print(data);
-    //display.display();
+    // display.clearDisplay();
+    // display.display();
+    // display.drawRect(0, 0, 128, 64, SSD1306_WHITE);
+    // display.setTextSize(1);
+    // display.setCursor(8, 6); // Start at top-left corner
+    // display.print("BLE " + ble_mode + " send:");
+    // display.setCursor(8, 21); // Start at top-left corner
+    // display.print(data);
+    // display.display();
     //---------------------
     oled_efect_1_tic = 2500; // reset
   }
@@ -183,30 +204,30 @@ void loop()
     // oled_battery();
   }
 
-/*
-  if (!oled_efect_1_tic)
-  {
-    static int index = 1;
-    oled_efect_1_tic = 5000;
-    switch (index)
+  
+    if (!oled_efect_1_tic)
     {
-    case 1:
-      oled_effect_1();
-      break;
-    case 2:
-      oled_wifi();
-      break;
-    case 3:
-      oled_battery();
-      break;
+      static int index = 1;
+      oled_efect_1_tic = 5000;
+      switch (index)
+      {
+      case 1:
+        oled_effect_1();
+        break;
+      case 2:
+        oled_wifi();
+        break;
+      case 3:
+        oled_battery();
+        break;
 
-    default:
-      index = 0;
-      break;
-    }
-    index++;
-}
-*/
+      default:
+        index = 0;
+        break;
+      }
+      index++;
+  }
+  
 
   //////////////////////////////////////////////
   // if ((last_MLX90614_ambient_temp != MLX90614_ambient_temp) || (last_MLX90614_object_temp != MLX90614_object_temp))

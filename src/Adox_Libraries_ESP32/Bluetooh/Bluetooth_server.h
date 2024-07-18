@@ -50,20 +50,17 @@ class MyCallbacks : public BLECharacteristicCallbacks
 
         if (rxValue.length() > 0)
         {
-            Serial.print("[BLE] received value: ");
-            for (int i = 0; i < rxValue.length(); i++)
-                Serial.print(rxValue[i]);
-            Serial.println();
-            
+
             // Procesar el mensaje recibido
             String receivedMessage = "";
-            for (int i = 0; i < rxValue.length(); i++) {
+            for (int i = 0; i < rxValue.length(); i++)
+            {
                 receivedMessage += rxValue[i];
             }
 
-            // Usar el mensaje recibido como necesites
-            Serial.print("[BLE] processed message: ");
-            Serial.println(receivedMessage);
+            ble_msg = receivedMessage;
+            Serial.print("[BLE] received value: " + ble_msg);
+            ble_flag_new_data = true;
         }
     }
 };

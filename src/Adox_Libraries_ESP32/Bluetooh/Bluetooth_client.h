@@ -14,6 +14,8 @@ bool ble_flag_send_msg = false;
 bool ble_client_connection = false;
 bool ble_client_first_connection = false;
 bool ble_client_status = false;
+//----> General
+bool ble_status = false;
 
 String ble_msg = "";
 
