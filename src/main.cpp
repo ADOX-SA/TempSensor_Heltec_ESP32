@@ -93,6 +93,12 @@ void loop()
   MFRC522_loop();     // Lectura de tarjetas RFID.
   /***************************************************/
 
+
+
+  //--------------------------------------------------
+  //------> Recepcion de RFID
+  //--------------------------------------------------
+
   if (flag_new_rfid)
   {
     flag_new_rfid = false;
@@ -114,24 +120,34 @@ void loop()
     oled_efect_1_tic = 2500; // reset
   }
 
+
+  //--------------------------------------------------
+  //------> Enviar mensaje por BLE
+  //--------------------------------------------------
+
   if (ble_flag_send_msg)
   {
     Serial.print("\n[BLE]: send");
     ble_flag_send_msg = false;
     BluetoothSend(rfid_serial);
-    //---------------------
-    // display.clearDisplay();
-    // display.display();
-    // display.drawRect(0, 0, 128, 64, SSD1306_WHITE);
-    // display.setTextSize(1);
-    // display.setCursor(8, 6); // Start at top-left corner
-    // display.print("BLE " + ble_mode + " send:");
-    // display.setCursor(8, 21); // Start at top-left corner
-    // display.print(data);
-    // display.display();
-    //---------------------
+
+    display.clearDisplay();
+    display.display();
+    display.drawRect(0, 0, 128, 64, SSD1306_WHITE);
+    display.setTextSize(1);
+    display.setCursor(8, 6); // Start at top-left corner
+    display.print("BLE " + ble_mode + " send:");
+    display.setCursor(8, 21); // Start at top-left corner
+    display.print(rfid_serial);
+    display.display();
+
     oled_efect_1_tic = 2500; // reset
   }
+
+
+  //--------------------------------------------------
+  //------> Recepción de mensaje BLE
+  //--------------------------------------------------
 
   if (ble_flag_new_data)
   {
@@ -150,19 +166,30 @@ void loop()
     oled_efect_1_tic = 2500; // reset
   }
 
+
+  //--------------------------------------------------
+  //------> Lectura de sensor
+  //--------------------------------------------------
   if (!MLX90614_tic)
   {
     // MLX90614_read();
     MLX90614_tic = 500;
   }
 
+
+  //--------------------------------------------------
+  //------> Lectura de bateria
+  //--------------------------------------------------
   if (!battery_tic)
   {
-    Serial.println("eStOy ViVo");
     battery_tic = 50000;
     battery_read();
-    // oled_battery();
   }
+
+
+  //--------------------------------------------------
+  //------> Pantalla OLED
+  //--------------------------------------------------
 
   if (!oled_efect_1_tic)
   {
@@ -207,47 +234,26 @@ void loop()
     index++;
   }
 
-  //////////////////////////////////////////////
-  // if ((last_MLX90614_ambient_temp != MLX90614_ambient_temp) || (last_MLX90614_object_temp != MLX90614_object_temp))
-  /*
+
+  //--------------------------------------------------
+  //------> Sensor de temperatura optico
+  //--------------------------------------------------
+
   if (last_MLX90614_object_temp != MLX90614_object_temp)
   {
     last_MLX90614_object_temp = MLX90614_object_temp;
-
-    String aux = String(MLX90614_object_temp, 1) + " ";
-    int tam = aux.length();
-    display.setCursor(25, 30); // Start at top-left corner
-    display.setTextSize(2);
-    display.setTextColor(SSD1306_BLACK);
-    // display.fillRect(25, 30, 50, 25, SSD1306_BLACK);
-    display.cp437(true);
-    display.write(219);
-    display.write(219);
-    display.write(219);
-    display.write(219);
-    display.write(219);
-    display.display();
-
-    display.setCursor(25, 30); // Start at top-left corner
-    display.setTextColor(SSD1306_WHITE);
-    display.print(aux);
-    // display.cp437(true);
-    // display.write(248);
-    // display.print("C");
-    display.display();
   }
-*/
-  //////////////////////////////////////////////
-  //////////////////////////////////////////////
-  /*
-    if (!send_UDP_tic)
-    {
-      send_UDP_tic = 3000;
-      String Paquete = "temperature=" + String(MLX90614_object_temp) + "&battery_state=A Bateria";
-      Send_UDP(IP_remote, PORT_remote, Paquete);
-      // flag_measure = 1;
-      // Serial.print("Envio: " + Paquete);
-      MLX90614_read();
-    }
-    */
+
+
+  //--------------------------------------------------
+  //------> Envio de datos por UDP
+  //--------------------------------------------------
+
+  if (!send_UDP_tic)
+  {
+    send_UDP_tic = 3000;
+    String Paquete = "temperature=" + String(MLX90614_object_temp) + "&battery_state=A Bateria";
+    Send_UDP(IP_remote, PORT_remote, Paquete);
+    MLX90614_read();
+  }
 }
